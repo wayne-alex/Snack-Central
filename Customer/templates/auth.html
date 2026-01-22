@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snack Central</title>
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #10B981;
+            --primary-orange: #F59E0B;
+            --accent-blue: #1E40AF;
+            --light-cream: #FEFCE8;
+            --dark-text: #1F2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-cream) 0%, #fff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Food Background */
+        .floating-food {
+            position: fixed;
+            font-size: 3rem;
+            opacity: 0.1;
+            animation: float 20s infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-100px) rotate(90deg);
+            }
+            50% {
+                transform: translateY(-50px) rotate(180deg);
+            }
+            75% {
+                transform: translateY(-150px) rotate(270deg);
+            }
+        }
+
+        .floating-food:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-food:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            animation-delay: 3s;
+        }
+
+        .floating-food:nth-child(3) {
+            top: 60%;
+            left: 5%;
+            animation-delay: 6s;
+        }
+
+        .floating-food:nth-child(4) {
+            top: 70%;
+            right: 10%;
+            animation-delay: 9s;
+        }
+
+        .floating-food:nth-child(5) {
+            top: 40%;
+            left: 80%;
+            animation-delay: 12s;
+        }
+
+        /* Auth Container */
+        .auth-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+        }
+
+        /* Logo */
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo i {
+            font-size: 4rem;
+            color: var(--primary-green);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo h2 {
+            color: var(--primary-green);
+            font-weight: bold;
+            margin-top: 1rem;
+            font-size: 2rem;
+        }
+
+        .logo p {
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        /* Form Styles */
+        .form-label {
+            color: var(--dark-text);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+            outline: none;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+            font-size: 1.1rem;
+            z-index: 10;
+        }
+
+        .form-control.with-icon {
+            padding-left: 45px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9CA3AF;
+            font-size: 1.1rem;
+            z-index: 10;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-green);
+        }
+
+        /* Buttons */
+        .btn-auth {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-auth:active {
+            transform: translateY(0);
+        }
+
+        .btn-auth.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-auth .btn-text {
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+
+        .btn-auth.loading .btn-text {
+            opacity: 0;
+        }
+
+        /* Loading Animation - Phone with Bouncing Burger */
+        .loading-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-auth.loading .loading-container {
+            display: flex;
+        }
+
+        .phone-icon {
+            font-size: 2rem;
+            color: white;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-5px);
+            }
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .burger-bounce {
+            font-size: 1.5rem;
+            animation: burgerBounce 0.6s infinite;
+        }
+
+        @keyframes burgerBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        /* Links */
+        .auth-link {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .auth-link:hover {
+            color: var(--primary-orange);
+            text-decoration: underline;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 2rem;
+            color: #6B7280;
+        }
+
+        /* Toggle between Login and Signup */
+        .form-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 2rem 0;
+            color: #9CA3AF;
+            font-size: 0.9rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .divider span {
+            padding: 0 1rem;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+            border: 2px solid var(--primary-green);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            animation: slideDown 0.5s;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-message.show {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .success-message i {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #FEE2E2;
+            border: 2px solid #EF4444;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        .error-message.show {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .error-message i {
+            font-size: 1.5rem;
+            color: #EF4444;
+        }
+
+        /* Back to Home */
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .back-home a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark-text);
+            text-decoration: none;
+            padding: 0.7rem 1.5rem;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .back-home a:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .auth-card {
+                padding: 2rem 1.5rem;
+                border-radius: 20px;
+            }
+
+            .logo h2 {
+                font-size: 1.5rem;
+            }
+
+            .logo i {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Food Background -->
+<div class="floating-food">🍕</div>
+<div class="floating-food">🍔</div>
+<div class="floating-food">🍟</div>
+<div class="floating-food">🥤</div>
+<div class="floating-food">🌮</div>
+
+
+<!-- Auth Container -->
+<div class="auth-container">
+    <div class="auth-card">
+        <!-- Logo -->
+        <div class="logo">
+            <i class="fas fa-burger"></i>
+            <h2>Snack Central</h2>
+            <p id="auth-subtitle">Welcome back! Sign in to continue</p>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>Success!</strong>
+                <p class="mb-0" id="successText">Account created successfully!</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>
+                <strong>Error!</strong>
+                <p class="mb-0" id="errorText">Invalid credentials. Please try again.</p>
+            </div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="form-section active" id="loginForm">
+            <form id="loginFormElement">
+                <!-- Phone Number -->
+                <div class="mb-3">
+                    <label for="loginPhone" class="form-label">Phone Number</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-phone"></i>
+                        <input type="tel" class="form-control with-icon" id="loginPhone"
+                               placeholder="0712345678" required pattern="[0-9]{10}">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="loginPassword" class="form-label">Password</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-lock"></i>
+                        <input type="password" class="form-control with-icon" id="loginPassword"
+                               placeholder="Enter your password" required>
+                        <i class="password-toggle fas fa-eye" onclick="togglePassword('loginPassword', this)"></i>
+                    </div>
+                </div>
+
+                <!-- Forgot Password -->
+                <div class="forgot-password">
+                    <a href="#" class="auth-link" onclick="showForgotPassword(event)">Forgot Password?</a>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit" class="btn btn-auth" id="loginBtn">
+                    <span class="btn-text">Sign In</span>
+                    <div class="loading-container">
+                        <span class="burger-bounce">🍔</span>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Switch to Signup -->
+            <div class="switch-form">
+                Don't have an account? <a href="#" class="auth-link" onclick="switchForm(event, 'signup')">Sign Up</a>
+            </div>
+        </div>
+
+        <!-- SIGNUP FORM -->
+        <div class="form-section" id="signupForm">
+            <form id="signupFormElement">
+                <!-- Full Name -->
+                <div class="mb-3">
+                    <label for="signupName" class="form-label">Full Name</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-user"></i>
+                        <input type="text" class="form-control with-icon" id="signupName"
+                               placeholder="John Doe" required>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="signupEmail" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-envelope"></i>
+                        <input type="email" class="form-control with-icon" id="signupEmail"
+                               placeholder="john@example.com" required>
+                    </div>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="mb-3">
+                    <label for="signupPhone" class="form-label">Phone Number (M-Pesa)</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-phone"></i>
+                        <input type="tel" class="form-control with-icon" id="signupPhone"
+                               placeholder="0712345678" required pattern="[0-9]{10}">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="signupPassword" class="form-label">Password</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-lock"></i>
+                        <input type="password" class="form-control with-icon" id="signupPassword"
+                               placeholder="Create a strong password" required minlength="6">
+                        <i class="password-toggle fas fa-eye" onclick="togglePassword('signupPassword', this)"></i>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-lock"></i>
+                        <input type="password" class="form-control with-icon" id="signupConfirmPassword"
+                               placeholder="Confirm your password" required minlength="6">
+                        <i class="password-toggle fas fa-eye"
+                           onclick="togglePassword('signupConfirmPassword', this)"></i>
+                    </div>
+                </div>
+
+                <!-- Signup Button -->
+                <button type="submit" class="btn btn-auth" id="signupBtn">
+                    <span class="btn-text">Create Account</span>
+                    <div class="loading-container">
+                        <span class="burger-bounce">🍔</span>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Switch to Login -->
+            <div class="switch-form">
+                Already have an account? <a href="#" class="auth-link" onclick="switchForm(event, 'login')">Sign In</a>
+            </div>
+        </div>
+
+        <!-- FORGOT PASSWORD FORM -->
+        <div class="form-section" id="forgotPasswordForm">
+            <form id="forgotPasswordFormElement">
+                <p class="text-center mb-4" style="color: #6B7280;">
+                    Enter your Email Address and we'll send you a verification code to reset your password.
+                </p>
+                <div class="mb-3">
+                    <label for="forgotPhone" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <i class="input-icon fas fa-phone"></i>
+                        <input type="email" class="form-control with-icon" id="forgotEmail"
+                               placeholder="john@example.com">
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <button type="submit" class="btn btn-auth" id="forgotBtn">
+                    <span class="btn-text">Send Reset Code</span>
+                    <div class="loading-container">
+                        <span class="burger-bounce">🍔</span>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Back to Login -->
+            <div class="switch-form">
+                <a href="#" class="auth-link" onclick="switchForm(event, 'login')">
+                    <i class="fas fa-arrow-left"></i> Back to Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Toggle Password Visibility
+    function togglePassword(inputId, iconElement) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            iconElement.classList.remove('fa-eye');
+            iconElement.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            iconElement.classList.remove('fa-eye-slash');
+            iconElement.classList.add('fa-eye');
+        }
+    }
+
+    // Switch Between Forms
+    function switchForm(event, formType) {
+        event.preventDefault();
+
+        // Hide all forms
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Hide messages
+        hideMessages();
+
+        // Show selected form and update subtitle
+        if (formType === 'login') {
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('auth-subtitle').textContent = 'Welcome back! Sign in to continue';
+        } else if (formType === 'signup') {
+            document.getElementById('signupForm').classList.add('active');
+            document.getElementById('auth-subtitle').textContent = 'Create your account to get started';
+        }
+    }
+
+    // Show Forgot Password Form
+    function showForgotPassword(event) {
+        event.preventDefault();
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById('forgotPasswordForm').classList.add('active');
+        document.getElementById('auth-subtitle').textContent = 'Reset Your Password';
+        hideMessages();
+    }
+
+    // Show/Hide Messages
+    function showSuccess(message) {
+        const successDiv = document.getElementById('successMessage');
+        const successText = document.getElementById('successText');
+        successText.textContent = message;
+        successDiv.classList.add('show');
+
+        setTimeout(() => {
+            successDiv.classList.remove('show');
+        }, 5000);
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        errorText.textContent = message;
+        errorDiv.classList.add('show');
+
+        setTimeout(() => {
+            errorDiv.classList.remove('show');
+        }, 5000);
+    }
+
+    function hideMessages() {
+        document.getElementById('successMessage').classList.remove('show');
+        document.getElementById('errorMessage').classList.remove('show');
+    }
+
+    function getCSRFToken() {
+        return document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    }
+
+    // Login Form Handler
+    document.getElementById('loginFormElement').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        hideMessages();
+
+        const phone = document.getElementById('loginPhone').value;
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+
+        btn.classList.add('loading');
+
+        try {
+            const res = await fetch('/auth/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: JSON.stringify({phone, password})
+            });
+
+            const data = await res.json();
+            btn.classList.remove('loading');
+
+            if (res.ok) {
+                showSuccess('Login successful! Redirecting...');
+                setTimeout(() => window.location.href = {% url 'dashboard' %}, 1200);
+            } else {
+                showError(data.error || 'Login failed');
+            }
+
+        } catch (err) {
+            btn.classList.remove('loading');
+            showError('Server error. Try again.');
+        }
+    });
+
+document.getElementById('signupFormElement').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hideMessages();
+
+    const fullName = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value;
+    const phone = document.getElementById('signupPhone').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+    const signupBtn = document.getElementById('signupBtn');
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+        showError('Please enter a valid 10-digit phone number');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+    }
+
+    if (password.length < 6) {
+        showError('Password must be at least 6 characters long');
+        return;
+    }
+
+    const [first_name, ...rest] = fullName.split(' ');
+    const last_name = rest.join(' ') || 'User';
+
+    signupBtn.classList.add('loading');
+
+    try {
+        const res = await fetch('/auth/signup/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({
+                first_name,
+                last_name,
+                email,
+                phone,
+                password
+            })
+        });
+
+        const data = await res.json();
+        signupBtn.classList.remove('loading');
+
+        if (res.ok) {
+            showSuccess('Account created! Please sign in.');
+            switchForm(new Event('click'), 'login');
+        } else {
+            showError(data.error || 'Signup failed');
+        }
+
+    } catch (err) {
+        signupBtn.classList.remove('loading');
+        showError('Server error');
+        console.error(err);
+    }
+});
+
+
+    // Forgot Password Form Handler
+    document.getElementById('forgotPasswordFormElement').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        hideMessages();
+
+        const email = document.getElementById('forgotEmail').value;
+        const btn = document.getElementById('forgotBtn');
+
+        btn.classList.add('loading');
+
+        try {
+            const res = await fetch('/auth/forgot-password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: JSON.stringify({email})
+            });
+
+            const data = await res.json();
+            btn.classList.remove('loading');
+
+            if (res.ok) {
+                showSuccess('Password reset email sent!');
+            } else {
+                showError(data.error || 'Request failed');
+            }
+
+        } catch {
+            btn.classList.remove('loading');
+            showError('Server error');
+        }
+    });
+
+    // Phone number formatting (adds spacing for readability)
+    document.querySelectorAll('input[type="tel"]').forEach(input => {
+        input.addEventListener('input', function (e) {
+            // Remove non-digits
+            let value = e.target.value.replace(/\D/g, '');
+            // Limit to 10 digits
+            value = value.substring(0, 10);
+            e.target.value = value;
+        });
+    });
+
+    // Add enter key support for form submission
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const form = this.closest('form');
+                if (form) {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

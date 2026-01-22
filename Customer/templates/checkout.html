@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snack Central - Checkout</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #10B981;
+            --primary-orange: #F59E0B;
+            --accent-blue: #1E40AF;
+            --light-cream: #FEFCE8;
+            --dark-text: #1F2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F9FAFB;
+            overflow-x: hidden;
+        }
+
+        /* Top Header */
+        .checkout-header {
+            background: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            background: var(--light-cream);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-text);
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px);
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .header-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark-text);
+            margin: 0;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            width: 24px;
+            background: var(--primary-green);
+            border-radius: 4px;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            background: white;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .steps-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .steps-line {
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: #E5E7EB;
+            z-index: 1;
+        }
+
+        .steps-line-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+            transition: width 0.5s ease;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 3px solid #E5E7EB;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .step.completed .step-circle {
+            background: var(--primary-green);
+            border-color: var(--primary-green);
+            color: white;
+        }
+
+        .step.active .step-circle {
+            background: var(--primary-orange);
+            border-color: var(--primary-orange);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .step.active .step-label,
+        .step.completed .step-label {
+            color: var(--dark-text);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 0 1rem 2rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--dark-text);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary-green);
+        }
+
+        /* Delivery Location */
+        .location-card {
+            background: var(--light-cream);
+            border-radius: 15px;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .location-card:hover {
+            border-color: var(--primary-green);
+        }
+
+        .location-card.selected {
+            border-color: var(--primary-green);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(245, 158, 11, 0.1));
+        }
+
+        .location-icon {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            flex-shrink: 0;
+        }
+
+        .location-details {
+            flex: 1;
+        }
+
+        .location-name {
+            font-weight: bold;
+            color: var(--dark-text);
+            margin-bottom: 0.3rem;
+        }
+
+        .location-address {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .location-check {
+            color: var(--primary-green);
+            font-size: 1.5rem;
+            display: none;
+        }
+
+        .location-card.selected .location-check {
+            display: block;
+        }
+
+        /* Custom Location Input */
+        .custom-location-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            border: 2px solid #E5E7EB;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .custom-location-container.selected {
+            border-color: var(--primary-green);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(245, 158, 11, 0.05));
+        }
+
+        .custom-location-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .custom-location-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--light-cream);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-orange);
+            flex-shrink: 0;
+        }
+
+        .custom-location-title {
+            flex: 1;
+        }
+
+        .custom-location-name {
+            font-weight: bold;
+            color: var(--dark-text);
+            margin-bottom: 0.3rem;
+        }
+
+        .custom-location-description {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .custom-location-input-container {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .custom-location-input-container.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .custom-location-input {
+            width: 100%;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .custom-location-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .custom-location-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        /* Delivery Instructions */
+        .instruction-input {
+            width: 100%;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .instruction-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Order Items */
+        .order-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            background: var(--light-cream);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.3rem;
+        }
+
+        .item-quantity {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .item-price {
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        /* Payment Method */
+        .payment-option {
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 15px;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-option:hover {
+            border-color: var(--primary-green);
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary-green);
+            background: var(--light-cream);
+        }
+
+        .payment-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--light-cream);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .payment-option.selected .payment-icon {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .payment-details {
+            flex: 1;
+        }
+
+        .payment-name {
+            font-weight: bold;
+            color: var(--dark-text);
+            margin-bottom: 0.2rem;
+        }
+
+        .payment-desc {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .payment-check {
+            color: var(--primary-green);
+            font-size: 1.5rem;
+            display: none;
+        }
+
+        .payment-option.selected .payment-check {
+            display: block;
+        }
+
+        /* Order Summary */
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            font-size: 0.95rem;
+        }
+
+        .summary-row.total {
+            border-top: 2px dashed #E5E7EB;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .summary-label {
+            color: #6B7280;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        .summary-row.total .summary-value {
+            color: var(--primary-green);
+        }
+
+        /* Place Order Button */
+        .place-order-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 1.2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .place-order-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .place-order-btn:active {
+            transform: translateY(0);
+        }
+
+        .place-order-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.3s;
+        }
+
+        .place-order-btn.loading .btn-content {
+            opacity: 0;
+        }
+
+        .loading-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .place-order-btn.loading .loading-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phone-icon {
+            font-size: 2rem;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-5px);
+            }
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .burger-bounce {
+            font-size: 1.5rem;
+            animation: burgerBounce 0.6s infinite;
+        }
+
+        @keyframes burgerBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        /* Success Modal */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s;
+        }
+
+        .success-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .success-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 2rem;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            animation: slideUp 0.5s;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 1.5rem;
+            animation: bounceIn 0.8s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .success-message {
+            color: #6B7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-number {
+            background: var(--light-cream);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .success-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .track-order-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .back-home-btn {
+            background: var(--light-cream);
+            color: var(--dark-text);
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        /* Promo Code */
+        .promo-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .promo-input {
+            flex: 1;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 0.7rem;
+            font-size: 0.9rem;
+        }
+
+        .promo-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        .apply-promo-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .promo-toggle {
+            color: var(--primary-green);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .promo-section {
+            display: none;
+        }
+
+        .promo-section.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .steps-container {
+                padding: 0 0.5rem;
+            }
+
+            .step-label {
+                font-size: 0.65rem;
+            }
+
+            .step-circle {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div class="checkout-header">
+    <div class="container">
+        <div class="header-content">
+            <button class="back-btn" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="header-title">Checkout</h1>
+            <div class="step-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Steps -->
+<div class="progress-steps">
+    <div class="container">
+        <div class="steps-container">
+            <div class="steps-line">
+                <div class="steps-line-fill" id="progressLine" style="width: 0%;"></div>
+            </div>
+            <div class="step active" id="step1">
+                <div class="step-circle">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="step-label">Delivery</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-circle">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="step-label">Payment</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-circle">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="step-label">Confirm</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="container">
+        <!-- Step 1: Delivery Location -->
+        <div class="checkout-step" id="deliveryStep">
+            <div class="section">
+                <div class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Delivery Location
+                </div>
+
+                <!-- Default EAVI Main Gate Location -->
+                <div class="location-card selected" data-location="main-gate" id="defaultLocationCard">
+                    <div class="location-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="location-details">
+                        <div class="location-name">EAVI Main Gate</div>
+                        <div class="location-address">Main Gate Entrance, EAVI Campus</div>
+                    </div>
+                    <i class="fas fa-check-circle location-check"></i>
+                </div>
+                {% if location %}
+                    <div class="location-card" data-location="block-b">
+                        <div class="location-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="location-details">
+                            <div class="location-name">{{ location.name }}</div>
+                            <div class="location-address">{{ location.building }}</div>
+                        </div>
+                        <i class="fas fa-check-circle location-check"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Custom Location Option -->
+            <div class="custom-location-container" id="customLocationContainer">
+                <div class="custom-location-header" onclick="toggleCustomLocation()">
+                    <div class="custom-location-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="custom-location-title">
+                        <div class="custom-location-name">Custom Delivery Place</div>
+                        <div class="custom-location-description">Enter your specific delivery location</div>
+                    </div>
+                    <i class="fas fa-check-circle location-check" id="customLocationCheck"
+                       style="display: none;"></i>
+                </div>
+
+                <div class="custom-location-input-container" id="customLocationInput">
+                    <input type="text"
+                           class="custom-location-input"
+                           id="customLocationText"
+                           placeholder="Enter your delivery location (e.g., Block C Room 305, Hostel 2, Library, etc.)"
+                           onfocus="selectCustomLocation()">
+                </div>
+            </div>
+
+
+            <div class="section">
+                <div class="section-title">
+                    <i class="fas fa-comment-dots"></i>
+                    Delivery Instructions (Optional)
+                </div>
+                <textarea class="instruction-input"
+                          placeholder="E.g., Call when you arrive, Leave at the door, etc."
+                          id="deliveryNote"></textarea>
+            </div>
+
+            <button class="place-order-btn" onclick="goToStep(2)">
+                <div class="btn-content">
+                    Continue to Payment
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </button>
+        </div>
+
+        <!-- Step 2: Payment Method -->
+        <div class="checkout-step" id="paymentStep" style="display: none;">
+            <div class="section">
+                <div class="section-title">
+                    <i class="fas fa-credit-card"></i>
+                    Payment Method
+                </div>
+
+                <div class="payment-option selected" data-payment="mpesa">
+                    <div class="payment-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="payment-details">
+                        <div class="payment-name">M-Pesa</div>
+                        <div class="payment-desc">Pay via M-Pesa STK Push</div>
+                    </div>
+                    <i class="fas fa-check-circle payment-check"></i>
+                </div>
+
+                <div class="payment-option" data-payment="cash">
+                    <div class="payment-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="payment-details">
+                        <div class="payment-name">Cash on Delivery</div>
+                        <div class="payment-desc">Pay with cash when delivered</div>
+                    </div>
+                    <i class="fas fa-check-circle payment-check"></i>
+                </div>
+            </div>
+
+
+            <button class="place-order-btn" onclick="goToStep(3)">
+                <div class="btn-content">
+                    Review Order
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </button>
+        </div>
+
+        <!-- Step 3: Order Review -->
+        <div class="checkout-step" id="reviewStep" style="display: none;">
+            <div class="section">
+                <div class="section-title">
+                    <i class="fas fa-shopping-bag"></i>
+                    Order Items
+                </div>
+                {% for item in cart.items %}
+
+                    <div class="order-item">
+                        <div class="item-image">{{ item.emoji }}</div>
+                        <div class="item-details">
+                            <div class="item-name">{{ item.name }}</div>
+                            <div class="item-quantity">Qty: {{ item.quantity }}</div>
+                        </div>
+                        <div class="item-price">KES {{ item.total }}</div>
+                    </div>
+
+                {% endfor %}
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <i class="fas fa-receipt"></i>
+                    Order Summary
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Subtotal</span>
+                    <span class="summary-value">KES {{ cart.subtotal }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Delivery Fee</span>
+                    <span class="summary-value" style="color: var(--primary-green);">FREE</span>
+                </div>
+                <div class="summary-row" id="discountRow" style="display: none;">
+                    <span class="summary-label">Discount</span>
+                    <span class="summary-value"
+                          style="color: var(--primary-orange);">- KES {{ cart.subtotal }}</span>
+                </div>
+                <div class="summary-row total">
+                    <span class="summary-label">Total</span>
+                    <span class="summary-value">KES {{ cart.subtotal }}</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Delivery Details
+                </div>
+                <div style="color: #6B7280; font-size: 0.9rem; line-height: 1.6;">
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>Location:</strong> <span id="deliveryLocationDisplay">EAVI Main Gate</span>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>Payment:</strong> <span id="selectedPayment">M-Pesa</span>
+                    </div>
+                    <div>
+                        <strong>Estimated Time:</strong> 15-20 minutes
+                    </div>
+                </div>
+            </div>
+
+            <button class="place-order-btn" onclick="placeOrder()" id="placeOrderBtn">
+                <div class="btn-content">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Place Order ({{ cart.subtotal }})
+                </div>
+                <div class="loading-animation">
+                    <span class="burger-bounce">🍔</span>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-modal">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2 class="success-title">Order Placed!</h2>
+        <p class="success-message">Your order has been successfully placed and will be delivered soon.</p>
+        <div class="order-number" id="orderNumber"></div>
+        <div class="success-actions">
+            <button class="track-order-btn" onclick="trackOrder()">
+                <i class="fas fa-location-arrow me-2"></i>Track Order
+            </button>
+            <button class="back-home-btn" onclick="goHome()">
+                Back to Home
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentStep = 1;
+    let selectedLocation = 'main-gate';
+    let selectedPayment = 'mpesa';
+    let promoApplied = false;
+    let customLocation = '';
+    let deliveryNote = '';
+
+    // Location selection
+    document.querySelectorAll('.location-card').forEach(card => {
+        card.addEventListener('click', function () {
+            // Deselect all locations
+            document.querySelectorAll('.location-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('customLocationContainer').classList.remove('selected');
+            document.getElementById('customLocationCheck').style.display = 'none';
+
+            // Select clicked location
+            this.classList.add('selected');
+            selectedLocation = this.getAttribute('data-location');
+
+            // Hide custom input if it was open
+            document.getElementById('customLocationInput').classList.remove('show');
+
+            // Update delivery location display
+            updateDeliveryLocationDisplay();
+        });
+    });
+
+    // Toggle custom location input
+    function toggleCustomLocation() {
+        const customInput = document.getElementById('customLocationInput');
+        const isVisible = customInput.classList.contains('show');
+
+        if (!isVisible) {
+            // Open & select custom
+            selectCustomLocation();
+        } else {
+            // Close only if empty
+            const inputValue = document.getElementById('customLocationText').value.trim();
+            if (!inputValue) {
+                deselectCustomLocation();
+            }
+        }
+    }
+
+
+    // Select custom location
+    function selectCustomLocation() {
+        // Deselect all regular locations
+        document.querySelectorAll('.location-card').forEach(c => c.classList.remove('selected'));
+
+
+        // Select custom location
+        document.getElementById('customLocationContainer').classList.add('selected');
+        document.getElementById('customLocationCheck').style.display = 'block';
+
+        selectedLocation = 'custom';
+
+        // Show input if not already shown
+        document.getElementById('customLocationInput').classList.add('show');
+
+        // Focus on input
+        setTimeout(() => {
+            document.getElementById('customLocationText').focus();
+        }, 100);
+
+        updateDeliveryLocationDisplay();
+    }
+
+    // Deselect custom location
+    function deselectCustomLocation() {
+        document.getElementById('customLocationContainer').classList.remove('selected');
+        document.getElementById('customLocationCheck').style.display = 'none';
+        document.getElementById('customLocationInput').classList.remove('show');
+
+        // Reselect default location
+        document.getElementById('defaultLocationCard').classList.add('selected');
+        selectedLocation = 'main-gate';
+
+        updateDeliveryLocationDisplay();
+    }
+
+    // Update custom location when user types
+    document.getElementById('customLocationText').addEventListener('input', function () {
+        customLocation = this.value.trim();
+        updateDeliveryLocationDisplay();
+    });
+
+    // Update delivery location display
+    function updateDeliveryLocationDisplay() {
+        let locationText = '';
+
+        switch (selectedLocation) {
+            case 'main-gate':
+                locationText = 'EAVI Main Gate';
+                break;
+            case 'custom':
+                locationText = customLocation || 'Custom Location';
+                break;
+        }
+
+        document.getElementById('deliveryLocationDisplay').textContent = locationText;
+    }
+
+    // Payment selection
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function () {
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedPayment = this.getAttribute('data-payment');
+            updatePaymentDisplay();
+        });
+    });
+
+    // Update payment method display
+    function updatePaymentDisplay() {
+        const paymentText = selectedPayment === 'mpesa' ? 'M-Pesa' : 'Cash on Delivery';
+        document.getElementById('selectedPayment').textContent = paymentText;
+    }
+
+    // Go to specific step
+    function goToStep(step) {
+        // Validate step 1 before proceeding
+        if (step === 2) {
+            deliveryNote = document.getElementById('deliveryNote').value.trim();
+
+            if (selectedLocation === 'custom' && !customLocation) {
+                showToast('📝 Please enter your custom delivery location');
+                selectCustomLocation();
+                return;
+            }
+        }
+
+        // Hide all steps
+        document.querySelectorAll('.checkout-step').forEach(s => s.style.display = 'none');
+
+        // Update step indicators
+        document.querySelectorAll('.step').forEach(s => {
+            s.classList.remove('active', 'completed');
+        });
+
+        // Mark completed steps
+        for (let i = 1; i < step; i++) {
+            document.getElementById(`step${i}`).classList.add('completed');
+        }
+
+        // Mark active step
+        document.getElementById(`step${step}`).classList.add('active');
+
+        // Update progress line
+        const progress = ((step - 1) / 2) * 100;
+        document.getElementById('progressLine').style.width = progress + '%';
+
+        // Update step dots
+        const dots = document.querySelectorAll('.step-dot');
+        dots.forEach((dot, index) => {
+            if (index < step) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+
+        // Show current step
+        if (step === 1) {
+            document.getElementById('deliveryStep').style.display = 'block';
+        } else if (step === 2) {
+            document.getElementById('paymentStep').style.display = 'block';
+        } else if (step === 3) {
+            document.getElementById('reviewStep').style.display = 'block';
+        }
+
+        // Scroll to top
+        window.scrollTo({top: 0, behavior: 'smooth'});
+
+        currentStep = step;
+    }
+
+
+    // Place Order
+    function placeOrder() {
+        const btn = document.getElementById('placeOrderBtn');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        const orderData = {
+            location: selectedLocation === 'custom' ? customLocation : selectedLocation,
+            payment_method: selectedPayment,
+            delivery_note: deliveryNote,
+
+        };
+
+        fetch("{% url 'checkout_order' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+
+                if (data.success) {
+                    showToast("✅ Order placed successfully!");
+
+                    // ✅ Inject order ID into modal
+                    document.getElementById('orderNumber').textContent = `#${data.order_id}`;
+
+                    // ✅ Show success modal
+                    document.getElementById('successOverlay').classList.add('show');
+                } else {
+                    showToast("❌ Failed to place order");
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                showToast("⚠️ Network error. Try again.");
+            });
+    }
+
+
+    // Track Order
+    function trackOrder() {
+        showToast('Opening order tracking...');
+        setTimeout(() => {
+            // Redirect to tracking page
+            window.location.href = 'dashboard.html';
+        }, 1000);
+    }
+
+    // Go Home
+    function goHome() {
+        window.location.href = '{% url "dashboard" %}';
+    }
+
+    // Toast Notification
+    function showToast(message) {
+        document.querySelectorAll('.toast-notification').forEach(t => t.remove());
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.style.cssText = `
+                position: fixed;
+                top: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 50px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                z-index: 9999;
+                animation: slideDown 0.4s, slideUp 0.4s 2.1s;
+                font-weight: 600;
+                max-width: 90%;
+                text-align: center;
+            `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    // Toast animations
+    const toastStyle = document.createElement('style');
+    toastStyle.textContent = `
+            @keyframes slideDown {
+                from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+            @keyframes slideUp {
+                from { transform: translateX(-50%) translateY(0); opacity: 1; }
+                to { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+            }
+        `;
+    document.head.appendChild(toastStyle);
+
+
+    // Custom location input enter key
+    document.getElementById('customLocationText').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            if (this.value.trim()) {
+                document.getElementById('customLocationInput').classList.remove('show');
+            }
+        }
+    });
+
+    // Initialize
+    window.addEventListener('load', function () {
+        setTimeout(() => showToast('📋 Review your order details'), 500);
+        updateDeliveryLocationDisplay();
+        updatePaymentDisplay();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAVI Delivery - Riders Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <style>
+        :root {
+            --primary-green: #10B981;
+            --primary-orange: #F59E0B;
+            --accent-blue: #1E40AF;
+            --light-cream: #FEFCE8;
+            --dark-text: #1F2937;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-600: #6B7280;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #3B82F6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--gray-50);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+
+        .sidebar.collapsed .brand-text {
+            display: none;
+        }
+
+        .sidebar-toggle {
+            background: var(--gray-100);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--dark-text);
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--gray-200);
+            transform: rotate(180deg);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem;
+            border-radius: 10px;
+            color: var(--gray-600);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background: var(--gray-100);
+            color: var(--dark-text);
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 1.25rem;
+            transition: transform 0.2s;
+        }
+
+        .menu-item:hover .menu-icon {
+            transform: scale(1.1);
+        }
+
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+            padding: 0.875rem;
+        }
+
+        .menu-badge {
+            position: absolute;
+            right: 1rem;
+            background: var(--danger);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .menu-badge {
+            top: 0.25rem;
+            right: 0.25rem;
+            padding: 0.15rem 0.3rem;
+            font-size: 0.65rem;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--gray-200);
+            background: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            background: var(--gray-50);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .user-profile:hover {
+            background: var(--gray-100);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed .user-info {
+            display: none;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--dark-text);
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: 80px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            background: var(--gray-100);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-text);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--gray-200);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 2px solid white;
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: var(--gray-100);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--dark-text);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        /* Stats Overview */
+        .stats-overview {
+            grid-column: span 12;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.active {
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        .stat-icon.online {
+            background: linear-gradient(135deg, var(--info), #2563EB);
+        }
+
+        .stat-icon.offline {
+            background: linear-gradient(135deg, var(--gray-600), #4B5563);
+        }
+
+        .stat-icon.performance {
+            background: linear-gradient(135deg, var(--primary-orange), #D97706);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .stat-trend {
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-trend.up {
+            color: var(--success);
+        }
+
+        .stat-trend.down {
+            color: var(--danger);
+        }
+
+        /* Live Map Container */
+        .live-map-container {
+            grid-column: span 8;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .map-btn {
+            background: var(--gray-100);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .map-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .map-btn.active {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        #liveMap {
+            flex: 1;
+            min-height: 500px;
+            width: 100%;
+        }
+
+        /* Riders List */
+        .riders-list-container {
+            grid-column: span 4;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .riders-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .rider-card {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            animation: cardAppear 0.3s ease-out;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .rider-card:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .rider-card.selected {
+            border-color: var(--primary-green);
+            background: var(--light-cream);
+        }
+
+        .rider-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .rider-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+        }
+
+        .rider-status.online {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .rider-status.offline {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+
+        .rider-status.busy {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .rider-status.on-break {
+            background: #DBEAFE;
+            color: #1E3A8A;
+        }
+
+        .rider-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .rider-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .rider-details {
+            flex: 1;
+        }
+
+        .rider-name {
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        .rider-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--primary-orange);
+            font-size: 0.875rem;
+        }
+
+        .rider-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-box {
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .stat-value-small {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 0.125rem;
+        }
+
+        .stat-label-small {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        /* Performance Charts */
+        .performance-container {
+            grid-column: span 6;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container {
+            flex: 1;
+            padding: 1.5rem;
+            min-height: 300px;
+        }
+
+        /* Recent Assignments */
+        .assignments-container {
+            grid-column: span 6;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .assignments-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .assignment-item {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .assignment-item:hover {
+            background: var(--gray-50);
+        }
+
+        .assignment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment-id {
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .assignment-time {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .assignment-details {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .assignment-route {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .assignment-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .assignment-status.pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .assignment-status.in-progress {
+            background: #DBEAFE;
+            color: #1E3A8A;
+        }
+
+        .assignment-status.completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        /* Search and Filter */
+        .search-filter {
+            padding: 1rem 1.5rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 0.875rem;
+            color: var(--dark-text);
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .close-modal {
+            background: var(--gray-100);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--dark-text);
+            transition: all 0.2s;
+        }
+
+        .close-modal:hover {
+            background: var(--gray-200);
+            transform: rotate(90deg);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 10002;
+            animation: slideUp 0.3s ease-out;
+            max-width: 400px;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: var(--success);
+        }
+
+        .toast.error .toast-icon {
+            background: var(--danger);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            border: 2px dashed var(--gray-200);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-desc {
+            color: var(--gray-600);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .live-map-container {
+                grid-column: span 12;
+            }
+
+            .riders-list-container {
+                grid-column: span 12;
+            }
+
+            .performance-container,
+            .assignments-container {
+                grid-column: span 12;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.25rem;
+            }
+
+            .rider-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .map-controls {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .rider-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .rider-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .assignment-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <a href="#" class="sidebar-brand">
+            <i class="fas fa-bolt"></i>
+            <span class="brand-text">EAVI Delivery</span>
+        </a>
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-menu">
+        <a href="#dashboard" class="menu-item" onclick="showSection('dashboard')">
+            <i class="fas fa-th-large menu-icon"></i>
+            <span class="menu-text">Dashboard</span>
+        </a>
+        <a href="#orders" class="menu-item" onclick="showSection('orders')">
+            <i class="fas fa-shopping-bag menu-icon"></i>
+            <span class="menu-text">Orders</span>
+        </a>
+        <a href="#riders" class="menu-item active" onclick="showSection('riders')">
+            <i class="fas fa-motorcycle menu-icon"></i>
+            <span class="menu-text">Riders</span>
+            <span class="menu-badge">12</span>
+        </a>
+        <a href="#analytics" class="menu-item" onclick="showSection('analytics')">
+            <i class="fas fa-chart-line menu-icon"></i>
+            <span class="menu-text">Analytics</span>
+        </a>
+        <a href="#settings" class="menu-item" onclick="showSection('settings')">
+            <i class="fas fa-cog menu-icon"></i>
+            <span class="menu-text">Settings</span>
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="user-profile" onclick="toggleUserMenu()">
+            <div class="user-avatar">JK</div>
+            <div class="user-info">
+                <div class="user-name">John Kamau</div>
+                <div class="user-role">Operations Manager</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="page-title">Riders Dashboard</h1>
+        <div class="top-bar-actions">
+            <button class="action-btn" onclick="showNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">5</span>
+            </button>
+            <button class="action-btn" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="action-btn" onclick="addNewRider()">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon active">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i> 15%
+                    </div>
+                </div>
+                <div class="stat-value" id="activeRiders">8</div>
+                <div class="stat-label">Active Riders</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon online">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-trend">
+                        <i class="fas fa-minus"></i> 0%
+                    </div>
+                </div>
+                <div class="stat-value" id="deliveryTime">24 min</div>
+                <div class="stat-label">Avg Delivery Time</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon performance">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i> 8%
+                    </div>
+                </div>
+                <div class="stat-value" id="avgRating">4.7</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon offline">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="stat-trend down">
+                        <i class="fas fa-arrow-down"></i> 5%
+                    </div>
+                </div>
+                <div class="stat-value" id="completionRate">94%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+        </div>
+
+        <!-- Live Map -->
+        <div class="live-map-container">
+            <div class="section-header">
+                <h2 class="section-title">Live Rider Locations</h2>
+                <div class="map-controls">
+                    <button class="map-btn active" onclick="filterMapMarkers('all')">
+                        <i class="fas fa-globe"></i> All
+                    </button>
+                    <button class="map-btn" onclick="filterMapMarkers('online')">
+                        <i class="fas fa-circle"></i> Online
+                    </button>
+                    <button class="map-btn" onclick="filterMapMarkers('busy')">
+                        <i class="fas fa-shipping-fast"></i> Busy
+                    </button>
+                    <button class="map-btn" onclick="centerMap()">
+                        <i class="fas fa-crosshairs"></i> Center
+                    </button>
+                </div>
+            </div>
+            <div id="liveMap"></div>
+        </div>
+
+        <!-- Riders List -->
+        <div class="riders-list-container">
+            <div class="section-header">
+                <h2 class="section-title">All Riders</h2>
+            </div>
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search riders..."
+                           oninput="searchRiders(this.value)">
+                </div>
+            </div>
+            <div class="riders-list" id="ridersList">
+                <!-- Riders will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="performance-container">
+            <div class="section-header">
+                <h2 class="section-title">Performance Metrics</h2>
+                <select class="map-btn" onchange="updatePerformanceChart(this.value)" style="padding: 0.5rem 1rem;">
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Assignments -->
+        <div class="assignments-container">
+            <div class="section-header">
+                <h2 class="section-title">Recent Assignments</h2>
+                <button class="map-btn" onclick="viewAllAssignments()">
+                    <i class="fas fa-list"></i> View All
+                </button>
+            </div>
+            <div class="assignments-list" id="assignmentsList">
+                <!-- Assignments will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rider Details Modal -->
+<div class="modal-overlay" id="riderModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalRiderName"></h3>
+            <button class="close-modal" onclick="closeRiderModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <!-- Rider details will be dynamically inserted -->
+        </div>
+        <div class="modal-footer" style="padding: 1.5rem; border-top: 1px solid var(--gray-200);">
+            <button class="map-btn" onclick="contactRider()" style="flex: 1;">
+                <i class="fas fa-phone"></i> Contact
+            </button>
+            <button class="map-btn" onclick="sendMessage()"
+                    style="flex: 1; background: var(--primary-green); color: white;">
+                <i class="fas fa-comment"></i> Message
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Rider Modal -->
+<div class="modal-overlay" id="addRiderModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Rider</h3>
+            <button class="close-modal" onclick="closeAddRiderModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="addRiderForm" onsubmit="return submitNewRider(event)">
+                <div style="display: grid; gap: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--dark-text);">Full
+                            Name</label>
+                        <input type="text" class="search-input" placeholder="Enter rider's full name" required
+                               style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--dark-text);">Phone
+                            Number</label>
+                        <input type="tel" class="search-input" placeholder="+254 XXX XXX XXX" required
+                               style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--dark-text);">Vehicle
+                            Type</label>
+                        <select class="search-input" required style="width: 100%;">
+                            <option value="">Select vehicle</option>
+                            <option value="motorcycle">Motorcycle</option>
+                            <option value="bicycle">Bicycle</option>
+                            <option value="car">Car</option>
+                            <option value="scooter">Scooter</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--dark-text);">Initial
+                            Status</label>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="status" value="online" checked> Online
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="status" value="offline"> Offline
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <button type="button" class="map-btn" onclick="closeAddRiderModal()" style="flex: 1;">Cancel
+                    </button>
+                    <button type="submit" class="map-btn"
+                            style="flex: 1; background: var(--primary-green); color: white;">
+                        <i class="fas fa-plus"></i> Add Rider
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Sample data for riders
+    const riders = [
+        {
+            id: 1,
+            name: "David Mwangi",
+            status: "busy",
+            rating: 4.8,
+            deliveries: 124,
+            completed: 120,
+            avgTime: "22 min",
+            phone: "+254 712 345 678",
+            vehicle: "Motorcycle",
+            location: {lat: -1.286389, lng: 36.817223}, // Nairobi
+            earnings: 45000,
+            avatar: "DM"
+        },
+        {
+            id: 2,
+            name: "Peter Kamau",
+            status: "online",
+            rating: 4.6,
+            deliveries: 89,
+            completed: 85,
+            avgTime: "25 min",
+            phone: "+254 723 456 789",
+            vehicle: "Motorcycle",
+            location: {lat: -1.300, lng: 36.800},
+            earnings: 32000,
+            avatar: "PK"
+        },
+        {
+            id: 3,
+            name: "James Waweru",
+            status: "online",
+            rating: 4.9,
+            deliveries: 156,
+            completed: 152,
+            avgTime: "20 min",
+            phone: "+254 734 567 890",
+            vehicle: "Bicycle",
+            location: {lat: -1.270, lng: 36.830},
+            earnings: 52000,
+            avatar: "JW"
+        },
+        {
+            id: 4,
+            name: "Samuel Thiong'o",
+            status: "offline",
+            rating: 4.7,
+            deliveries: 102,
+            completed: 98,
+            avgTime: "28 min",
+            phone: "+254 745 678 901",
+            vehicle: "Motorcycle",
+            location: {lat: -1.310, lng: 36.840},
+            earnings: 38000,
+            avatar: "ST"
+        },
+        {
+            id: 5,
+            name: "Michael Brown",
+            status: "on-break",
+            rating: 4.5,
+            deliveries: 78,
+            completed: 75,
+            avgTime: "30 min",
+            phone: "+254 756 789 012",
+            vehicle: "Scooter",
+            location: {lat: -1.290, lng: 36.810},
+            earnings: 29000,
+            avatar: "MB"
+        },
+        {
+            id: 6,
+            name: "Brian Ochieng",
+            status: "busy",
+            rating: 4.8,
+            deliveries: 145,
+            completed: 142,
+            avgTime: "23 min",
+            phone: "+254 767 890 123",
+            vehicle: "Car",
+            location: {lat: -1.280, lng: 36.820},
+            earnings: 51000,
+            avatar: "BO"
+        }
+    ];
+
+    // Sample assignments data
+    const assignments = [
+        {
+            id: "ORD-001",
+            rider: "David Mwangi",
+            from: "KFC Westgate",
+            to: "123 Main St",
+            time: "10:30 AM",
+            status: "in-progress",
+            estimated: "15 min"
+        },
+        {
+            id: "ORD-002",
+            rider: "Peter Kamau",
+            from: "Artcaffe Galleria",
+            to: "456 Park Ave",
+            time: "11:15 AM",
+            status: "completed",
+            completed: "11:35 AM"
+        },
+        {
+            id: "ORD-003",
+            rider: "James Waweru",
+            from: "Java House CBD",
+            to: "789 Hill Rd",
+            time: "11:45 AM",
+            status: "in-progress",
+            estimated: "10 min"
+        },
+        {
+            id: "ORD-004",
+            rider: "Samuel Thiong'o",
+            from: "Dominos Pizza",
+            to: "321 Lake View",
+            time: "12:00 PM",
+            status: "pending",
+            estimated: "25 min"
+        },
+        {
+            id: "ORD-005",
+            rider: "Michael Brown",
+            from: "Burger King",
+            to: "654 Mountain Rd",
+            time: "12:30 PM",
+            status: "completed",
+            completed: "12:50 PM"
+        }
+    ];
+
+    // Global variables
+    let map = null;
+    let markers = [];
+    let performanceChart = null;
+    let selectedRider = null;
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function () {
+        updateStats();
+        renderRidersList(riders);
+        renderAssignments();
+        initializeMap();
+        initializePerformanceChart();
+        setupEventListeners();
+
+        // Simulate real-time updates
+        setInterval(updateRiderLocations, 15000);
+        setInterval(addNewAssignment, 30000);
+    });
+
+    // Update statistics
+    function updateStats() {
+        const activeRiders = riders.filter(r => r.status === 'online' || r.status === 'busy').length;
+        const avgRating = (riders.reduce((sum, r) => sum + r.rating, 0) / riders.length).toFixed(1);
+        const completionRate = Math.round((riders.reduce((sum, r) => sum + (r.completed / r.deliveries), 0) / riders.length) * 100);
+
+        document.getElementById('activeRiders').textContent = activeRiders;
+        document.getElementById('avgRating').textContent = avgRating;
+        document.getElementById('completionRate').textContent = `${completionRate}%`;
+    }
+
+    // Render riders list
+    function renderRidersList(ridersToRender) {
+        const ridersList = document.getElementById('ridersList');
+        ridersList.innerHTML = '';
+
+        if (ridersToRender.length === 0) {
+            ridersList.innerHTML = `
+                <div class="empty-state" style="margin: 2rem;">
+                    <div class="empty-icon">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <h3 class="empty-title">No Riders Found</h3>
+                    <p class="empty-desc">Try adjusting your search criteria</p>
+                </div>
+            `;
+            return;
+        }
+
+        ridersToRender.forEach(rider => {
+            const riderCard = createRiderCard(rider);
+            ridersList.appendChild(riderCard);
+        });
+    }
+
+    // Create rider card
+    function createRiderCard(rider) {
+        const card = document.createElement('div');
+        card.className = 'rider-card';
+        card.id = `rider-${rider.id}`;
+        card.onclick = () => showRiderDetails(rider.id);
+
+        const completionRate = Math.round((rider.completed / rider.deliveries) * 100);
+
+        card.innerHTML = `
+            <div class="rider-card-header">
+                <div class="rider-status ${rider.status}">
+                    <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                    ${rider.status.charAt(0).toUpperCase() + rider.status.slice(1)}
+                </div>
+                <div class="rider-rating">
+                    <i class="fas fa-star"></i>
+                    ${rider.rating}
+                </div>
+            </div>
+            <div class="rider-info">
+                <div class="rider-avatar">${rider.avatar}</div>
+                <div class="rider-details">
+                    <div class="rider-name">${rider.name}</div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600);">
+                        <i class="fas fa-motorcycle"></i> ${rider.vehicle} •
+                        <i class="fas fa-clock"></i> ${rider.avgTime} avg
+                    </div>
+                </div>
+            </div>
+            <div class="rider-stats">
+                <div class="stat-box">
+                    <div class="stat-value-small">${rider.deliveries}</div>
+                    <div class="stat-label-small">Deliveries</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value-small">${completionRate}%</div>
+                    <div class="stat-label-small">Completed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value-small">${rider.earnings.toLocaleString()}</div>
+                    <div class="stat-label-small">Earnings</div>
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    // Render assignments
+    function renderAssignments() {
+        const assignmentsList = document.getElementById('assignmentsList');
+        assignmentsList.innerHTML = '';
+
+        assignments.forEach(assignment => {
+            const assignmentItem = document.createElement('div');
+            assignmentItem.className = 'assignment-item';
+
+            let statusInfo = '';
+            if (assignment.status === 'in-progress') {
+                statusInfo = `<div style="font-size: 0.875rem; color: var(--info);">
+                    <i class="fas fa-clock"></i> ${assignment.estimated} left
+                </div>`;
+            } else if (assignment.status === 'completed') {
+                statusInfo = `<div style="font-size: 0.875rem; color: var(--success);">
+                    <i class="fas fa-check"></i> Delivered at ${assignment.completed}
+                </div>`;
+            } else {
+                statusInfo = `<div style="font-size: 0.875rem; color: var(--warning);">
+                    <i class="fas fa-clock"></i> ${assignment.estimated} ETA
+                </div>`;
+            }
+
+            assignmentItem.innerHTML = `
+                <div class="assignment-header">
+                    <div class="assignment-id">${assignment.id}</div>
+                    <div class="assignment-time">${assignment.time}</div>
+                </div>
+                <div class="assignment-details">
+                    <div style="font-weight: 600; color: var(--dark-text);">
+                        <i class="fas fa-motorcycle"></i> ${assignment.rider}
+                    </div>
+                    <div class="assignment-status ${assignment.status}">
+                        ${assignment.status.replace('-', ' ')}
+                    </div>
+                </div>
+                <div class="assignment-route">
+                    <span><i class="fas fa-map-marker-alt" style="color: var(--danger);"></i> ${assignment.from}</span>
+                    <i class="fas fa-arrow-right" style="color: var(--gray-600);"></i>
+                    <span><i class="fas fa-flag-checkered" style="color: var(--success);"></i> ${assignment.to}</span>
+                </div>
+                ${statusInfo}
+            `;
+
+            assignmentsList.appendChild(assignmentItem);
+        });
+    }
+
+    // Initialize map
+    function initializeMap() {
+        map = L.map('liveMap').setView([-1.286389, 36.817223], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add rider markers
+        riders.forEach(rider => {
+            addRiderMarker(rider);
+        });
+    }
+
+    // Add rider marker to map
+    function addRiderMarker(rider) {
+        const iconColors = {
+            online: 'green',
+            busy: 'orange',
+            offline: 'gray',
+            'on-break': 'blue'
+        };
+
+        const icon = L.divIcon({
+            html: `
+                <div style="
+                    width: 48px;
+                    height: 48px;
+                    background: ${iconColors[rider.status]};
+                    border-radius: 50%;
+                    border: 3px solid white;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    font-size: 18px;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                " title="${rider.name} - ${rider.status}">
+                    <i class="fas fa-motorcycle"></i>
+                </div>
+            `,
+            className: 'rider-marker',
+            iconSize: [48, 48],
+            iconAnchor: [24, 48],
+            popupAnchor: [0, -48]
+        });
+
+        const marker = L.marker([rider.location.lat, rider.location.lng], {icon})
+            .addTo(map)
+            .bindPopup(`
+                <div style="padding: 0.5rem; min-width: 200px;">
+                    <div style="font-weight: bold; margin-bottom: 0.25rem;">${rider.name}</div>
+                    <div style="color: ${iconColors[rider.status]}; margin-bottom: 0.5rem;">
+                        <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                        ${rider.status.charAt(0).toUpperCase() + rider.status.slice(1)}
+                    </div>
+                    <div style="margin-bottom: 0.25rem;">
+                        <i class="fas fa-star" style="color: gold;"></i> Rating: ${rider.rating}
+                    </div>
+                    <div style="margin-bottom: 0.25rem;">
+                        <i class="fas fa-shipping-fast"></i> Deliveries: ${rider.deliveries}
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <i class="fas fa-clock"></i> Avg Time: ${rider.avgTime}
+                    </div>
+                    <button onclick="showRiderDetails(${rider.id})" style="
+                        background: var(--primary-green);
+                        color: white;
+                        border: none;
+                        padding: 0.5rem 1rem;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        width: 100%;
+                    ">
+                        View Details
+                    </button>
+                </div>
+            `);
+
+        marker.riderId = rider.id;
+        markers.push(marker);
+    }
+
+    // Filter map markers
+    function filterMapMarkers(filter) {
+        // Update button states
+        document.querySelectorAll('.map-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        markers.forEach(marker => {
+            const rider = riders.find(r => r.id === marker.riderId);
+            if (rider) {
+                if (filter === 'all' ||
+                    (filter === 'online' && (rider.status === 'online' || rider.status === 'busy')) ||
+                    (filter === 'busy' && rider.status === 'busy')) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            }
+        });
+    }
+
+    // Center map on all riders
+    function centerMap() {
+        if (markers.length > 0) {
+            const group = L.featureGroup(markers.filter(m => map.hasLayer(m)));
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }
+
+    // Initialize performance chart
+    function initializePerformanceChart() {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+
+        performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [
+                    {
+                        label: 'Avg Delivery Time (min)',
+                        data: [28, 26, 25, 24, 23, 22, 21],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Completion Rate %',
+                        data: [88, 90, 92, 93, 94, 95, 96],
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Update performance chart
+    function updatePerformanceChart(period) {
+        // In a real app, you would fetch new data based on the period
+        const periodData = {
+            weekly: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                deliveryTime: [28, 26, 25, 24, 23, 22, 21],
+                completionRate: [88, 90, 92, 93, 94, 95, 96]
+            },
+            monthly: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                deliveryTime: [30, 28, 26, 24],
+                completionRate: [85, 88, 92, 94]
+            },
+            quarterly: {
+                labels: ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'],
+                deliveryTime: [32, 28, 26, 24],
+                completionRate: [82, 88, 92, 95]
+            }
+        };
+
+        const data = periodData[period] || periodData.weekly;
+
+        performanceChart.data.labels = data.labels;
+        performanceChart.data.datasets[0].data = data.deliveryTime;
+        performanceChart.data.datasets[1].data = data.completionRate;
+        performanceChart.update();
+    }
+
+    // Search riders
+    function searchRiders(query) {
+        const filtered = riders.filter(rider =>
+            rider.name.toLowerCase().includes(query.toLowerCase()) ||
+            rider.phone.includes(query) ||
+            rider.vehicle.toLowerCase().includes(query.toLowerCase())
+        );
+        renderRidersList(filtered);
+    }
+
+    // Show rider details modal
+    function showRiderDetails(riderId) {
+        const rider = riders.find(r => r.id === riderId);
+        if (!rider) return;
+
+        selectedRider = rider;
+
+        document.getElementById('modalRiderName').textContent = rider.name;
+
+        const completionRate = Math.round((rider.completed / rider.deliveries) * 100);
+        const earningsPerDelivery = Math.round(rider.earnings / rider.deliveries);
+
+        document.querySelector('.modal-body').innerHTML = `
+            <div style="padding: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="rider-avatar" style="width: 80px; height: 80px; font-size: 2rem;">${rider.avatar}</div>
+                    <div>
+                        <div class="rider-status ${rider.status}" style="display: inline-flex;">
+                            <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                            ${rider.status.charAt(0).toUpperCase() + rider.status.slice(1)}
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            <div style="font-weight: 600; color: var(--dark-text);">${rider.vehicle}</div>
+                            <div style="color: var(--gray-600);">${rider.phone}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Rating</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark-text);">
+                            ${rider.rating} <span style="color: var(--primary-orange);"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Avg Time</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark-text);">
+                            ${rider.avgTime} <span style="color: var(--info);"><i class="fas fa-clock"></i></span>
+                        </div>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Completion Rate</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark-text);">
+                            ${completionRate}% <span style="color: var(--success);"><i class="fas fa-check-circle"></i></span>
+                        </div>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Earnings/Delivery</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark-text);">
+                            KSh ${earningsPerDelivery} <span style="color: var(--warning);"><i class="fas fa-money-bill-wave"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="font-weight: 600; color: var(--dark-text); margin-bottom: 0.75rem;">Performance Summary</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; font-size: 0.875rem;">
+                        <div>
+                            <div style="color: var(--gray-600);">Total Deliveries</div>
+                            <div style="font-weight: 600;">${rider.deliveries}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray-600);">Completed</div>
+                            <div style="font-weight: 600;">${rider.completed}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray-600);">Total Earnings</div>
+                            <div style="font-weight: 600;">KSh ${rider.earnings.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray-600);">Active Since</div>
+                            <div style="font-weight: 600;">June 2023</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-weight: 600; color: var(--dark-text); margin-bottom: 0.75rem;">Recent Activity</div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600);">
+                        ${rider.status === 'busy' ?
+            `Currently delivering order ORD-00${rider.id} - Estimated completion in 15 minutes` :
+            rider.status === 'online' ?
+                `Available for assignments - Last delivery completed at 12:45 PM` :
+                rider.status === 'on-break' ?
+                    `On break until 2:00 PM - Last active at 12:30 PM` :
+                    `Last active yesterday at 6:00 PM`
+        }
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('riderModal').classList.add('show');
+
+        // Center map on selected rider
+        if (map) {
+            map.setView([rider.location.lat, rider.location.lng], 15);
+        }
+    }
+
+    // Close rider modal
+    function closeRiderModal() {
+        document.getElementById('riderModal').classList.remove('show');
+    }
+
+    // Add new rider
+    function addNewRider() {
+        document.getElementById('addRiderModal').classList.add('show');
+    }
+
+    // Close add rider modal
+    function closeAddRiderModal() {
+        document.getElementById('addRiderModal').classList.remove('show');
+    }
+
+    // Submit new rider
+    function submitNewRider(event) {
+        event.preventDefault();
+
+        // In a real app, you would send this to a server
+        const formData = new FormData(event.target);
+        const name = formData.get('name') || "New Rider";
+
+        showToast(`New rider "${name}" added successfully`, 'success');
+        closeAddRiderModal();
+        event.target.reset();
+
+        // Refresh the list
+        setTimeout(() => {
+            renderRidersList(riders);
+            updateStats();
+        }, 500);
+
+        return false;
+    }
+
+    // Contact rider
+    function contactRider() {
+        if (selectedRider) {
+            alert(`Calling ${selectedRider.name} at ${selectedRider.phone}`);
+        }
+    }
+
+    // Send message to rider
+    function sendMessage() {
+        if (selectedRider) {
+            alert(`Opening chat with ${selectedRider.name}`);
+        }
+    }
+
+    // View all assignments
+    function viewAllAssignments() {
+        showToast('Opening all assignments view', 'success');
+        // In a real app, this would navigate to a dedicated assignments page
+    }
+
+    // Update rider locations (simulated real-time)
+    function updateRiderLocations() {
+        riders.forEach(rider => {
+            // Simulate small movement
+            const latChange = (Math.random() - 0.5) * 0.01;
+            const lngChange = (Math.random() - 0.5) * 0.01;
+
+            rider.location.lat += latChange;
+            rider.location.lng += lngChange;
+
+            // Update marker position
+            const marker = markers.find(m => m.riderId === rider.id);
+            if (marker) {
+                marker.setLatLng([rider.location.lat, rider.location.lng]);
+            }
+        });
+
+        // Randomly change some rider statuses
+        if (Math.random() > 0.7) {
+            const randomRider = riders[Math.floor(Math.random() * riders.length)];
+            const oldStatus = randomRider.status;
+            const statuses = ['online', 'busy', 'on-break', 'offline'];
+            randomRider.status = statuses[Math.floor(Math.random() * statuses.length)];
+
+            if (oldStatus !== randomRider.status) {
+                // Update rider card
+                const riderCard = document.getElementById(`rider-${randomRider.id}`);
+                if (riderCard) {
+                    const statusElement = riderCard.querySelector('.rider-status');
+                    if (statusElement) {
+                        statusElement.className = `rider-status ${randomRider.status}`;
+                        statusElement.textContent = randomRider.status.charAt(0).toUpperCase() + randomRider.status.slice(1);
+                    }
+                }
+
+                updateStats();
+            }
+        }
+    }
+
+    // Add new assignment (simulated)
+    function addNewAssignment() {
+        const newId = `ORD-00${assignments.length + 1}`;
+        const ridersOnline = riders.filter(r => r.status === 'online' || r.status === 'busy');
+        if (ridersOnline.length === 0) return;
+
+        const randomRider = ridersOnline[Math.floor(Math.random() * ridersOnline.length)];
+
+        const newAssignment = {
+            id: newId,
+            rider: randomRider.name,
+            from: ["KFC", "Java", "Artcaffe", "Dominos"][Math.floor(Math.random() * 4)],
+            to: "Customer Address",
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
+            status: "pending",
+            estimated: `${15 + Math.floor(Math.random() * 15)} min`
+        };
+
+        assignments.unshift(newAssignment);
+        if (assignments.length > 10) assignments.pop();
+
+        // Update the rider status to busy if they were online
+        if (randomRider.status === 'online') {
+            randomRider.status = 'busy';
+
+            // Update UI
+            const riderCard = document.getElementById(`rider-${randomRider.id}`);
+            if (riderCard) {
+                const statusElement = riderCard.querySelector('.rider-status');
+                if (statusElement) {
+                    statusElement.className = 'rider-status busy';
+                    statusElement.textContent = 'Busy';
+                }
+            }
+
+            updateStats();
+        }
+
+        renderAssignments();
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        // Remove existing toasts
+        document.querySelectorAll('.toast').forEach(toast => toast.remove());
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}"></i>
+            </div>
+            <div>${message}</div>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 3000);
+    }
+
+    // Toggle sidebar
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    // Toggle mobile menu
+    function toggleMobileMenu() {
+        document.getElementById('sidebar').classList.toggle('show');
+    }
+
+    // Show section
+    function showSection(sectionId) {
+        // Update active menu item
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Update page title based on section
+        const titles = {
+            dashboard: 'Dashboard Overview',
+            orders: 'Order Management',
+            riders: 'Riders Dashboard',
+            analytics: 'Analytics & Reports',
+            settings: 'Settings'
+        };
+
+        document.querySelector('.page-title').textContent = titles[sectionId] || 'EAVI Delivery';
+    }
+
+    // Show notifications
+    function showNotifications() {
+        alert(`You have 5 notifications:\n\n1. Rider David completed delivery early\n2. New rider application received\n3. Performance review scheduled\n4. System update available\n5. 3 riders approaching break time`);
+    }
+
+    // Refresh dashboard
+    function refreshDashboard() {
+        const refreshBtn = event.target.closest('.action-btn');
+        const originalHtml = refreshBtn.innerHTML;
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        setTimeout(() => {
+            refreshBtn.innerHTML = originalHtml;
+            showToast('Dashboard refreshed successfully', 'success');
+            updateStats();
+        }, 1000);
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Close modals on overlay click
+        document.getElementById('riderModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('riderModal')) {
+                closeRiderModal();
+            }
+        });
+
+        document.getElementById('addRiderModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('addRiderModal')) {
+                closeAddRiderModal();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeRiderModal();
+                closeAddRiderModal();
+            }
+            if (e.key === 'r' && e.ctrlKey) {
+                e.preventDefault();
+                refreshDashboard();
+            }
+            if (e.key === 'n' && e.ctrlKey) {
+                e.preventDefault();
+                addNewRider();
+            }
+        });
+    }
+
+    // Toggle user menu (placeholder)
+    function toggleUserMenu() {
+        showToast('User menu would open here', 'success');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snack Central</title>
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #10B981;
+            --primary-orange: #F59E0B;
+            --accent-blue: #1E40AF;
+            --light-cream: #FEFCE8;
+            --dark-text: #1F2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            color: var(--dark-text);
+        }
+
+        /* Floating Food Animations */
+        .floating-food {
+            position: fixed;
+            font-size: 3rem;
+            opacity: 0.15;
+            animation: float 20s infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-100px) rotate(90deg);
+            }
+            50% {
+                transform: translateY(-50px) rotate(180deg);
+            }
+            75% {
+                transform: translateY(-150px) rotate(270deg);
+            }
+        }
+
+        .floating-food:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-food:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            animation-delay: 3s;
+        }
+
+        .floating-food:nth-child(3) {
+            top: 60%;
+            left: 5%;
+            animation-delay: 6s;
+        }
+
+        .floating-food:nth-child(4) {
+            top: 70%;
+            right: 10%;
+            animation-delay: 9s;
+        }
+
+        .floating-food:nth-child(5) {
+            top: 40%;
+            left: 80%;
+            animation-delay: 12s;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-green) !important;
+            text-shadow: 2px 2px 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .navbar-brand i {
+            color: var(--primary-orange);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .nav-link {
+            color: var(--dark-text) !important;
+            font-weight: 500;
+            margin: 0 1rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: var(--primary-orange);
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-order {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-order:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--light-cream) 0%, #fff 100%);
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 4rem 0;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1), transparent);
+            border-radius: 50%;
+            animation: pulse 8s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 1.5rem;
+            animation: slideInLeft 1s;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero-content .highlight {
+            color: var(--primary-green);
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-content .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 15px;
+            background: var(--primary-orange);
+            opacity: 0.3;
+            z-index: -1;
+            animation: expandWidth 2s ease-out;
+        }
+
+        @keyframes expandWidth {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            color: #6B7280;
+            margin-bottom: 2rem;
+            animation: slideInLeft 1s 0.2s backwards;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            margin: 2rem 0;
+            animation: slideInLeft 1s 0.4s backwards;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-orange);
+            display: block;
+        }
+
+        .stat-label {
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        .hero-image {
+            position: relative;
+            animation: slideInRight 1s;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .food-circle {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .food-emoji {
+            position: absolute;
+            font-size: 4rem;
+            animation: orbitFloat 4s ease-in-out infinite;
+        }
+
+        .food-emoji:nth-child(1) {
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 0s;
+        }
+
+        .food-emoji:nth-child(2) {
+            top: 50%;
+            right: -30px;
+            transform: translateY(-50%);
+            animation-delay: 1s;
+        }
+
+        .food-emoji:nth-child(3) {
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 2s;
+        }
+
+        .food-emoji:nth-child(4) {
+            top: 50%;
+            left: -30px;
+            transform: translateY(-50%);
+            animation-delay: 3s;
+        }
+
+        @keyframes orbitFloat {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(10px, -10px) scale(1.2);
+            }
+        }
+
+        .inner-circle {
+            width: 400px;
+            height: 400px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8rem;
+            animation: rotateReverse 20s linear infinite;
+        }
+
+        @keyframes rotateReverse {
+            from {
+                transform: rotate(360deg);
+            }
+            to {
+                transform: rotate(0deg);
+            }
+        }
+
+        /* Categories Section */
+        .categories {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            color: var(--dark-text);
+        }
+
+        .section-title span {
+            color: var(--primary-green);
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            border: 2px solid transparent;
+        }
+
+        .category-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.2);
+            border-color: var(--primary-green);
+        }
+
+        .category-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            animation: wiggle 2s infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(-10deg);
+            }
+            75% {
+                transform: rotate(10deg);
+            }
+        }
+
+        .category-card:hover .category-icon {
+            animation: jump 0.6s;
+        }
+
+        @keyframes jump {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .category-card h3 {
+            font-size: 1.5rem;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .category-card p {
+            color: #6B7280;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--light-cream) 0%, #fff 100%);
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            animation: popIn 0.6s backwards;
+        }
+
+        .step-card:nth-child(1) .step-number {
+            animation-delay: 0.2s;
+        }
+
+        .step-card:nth-child(2) .step-number {
+            animation-delay: 0.4s;
+        }
+
+        .step-card:nth-child(3) .step-number {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .step-card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--dark-text);
+        }
+
+        /* Features */
+        .features {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: var(--light-cream);
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover {
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateX(10px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-orange);
+            min-width: 60px;
+        }
+
+        .feature-item h5 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-text);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '🍕🍔🍟🌮🍿';
+            position: absolute;
+            top: 50%;
+            left: -10%;
+            font-size: 10rem;
+            opacity: 0.1;
+            animation: scrollRight 20s linear infinite;
+        }
+
+        @keyframes scrollRight {
+            from {
+                left: -10%;
+            }
+            to {
+                left: 110%;
+            }
+        }
+
+        .cta-section h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .cta-section p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn-cta {
+            background: white;
+            color: var(--primary-green);
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-text);
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+
+        .footer h5 {
+            color: var(--primary-orange);
+            margin-bottom: 1.5rem;
+        }
+
+        .footer a {
+            color: #9CA3AF;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .footer a:hover {
+            color: var(--primary-green);
+            padding-left: 10px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-icons a {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .social-icons a:hover {
+            background: var(--primary-orange);
+            transform: scale(1.2);
+            padding-left: 0;
+        }
+
+        .operating-hours {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .operating-hours h6 {
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .food-circle {
+                width: 300px;
+                height: 300px;
+            }
+
+            .inner-circle {
+                width: 240px;
+                height: 240px;
+                font-size: 5rem;
+            }
+
+            .food-emoji {
+                font-size: 2.5rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Food Background -->
+<div class="floating-food">🍕</div>
+<div class="floating-food">🍔</div>
+<div class="floating-food">🍟</div>
+<div class="floating-food">🥤</div>
+<div class="floating-food">🌮</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="fas fa-burger"></i> Snack Central</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#menu">Menu</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how">How It Works</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                <li class="nav-item">
+                    <button class="btn btn-order" onclick="location.href='{% url 'auth' %}'">
+                        Order Now
+                    </button>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1>Craving Something <span class="highlight">Delicious?</span></h1>
+                <p>Get your favorite snacks, fresh juices, and hot meals delivered to you in under 20
+                    minutes!</p>
+                <button class="btn btn-order btn-lg"><i class="fas fa-rocket me-2"></i>Order Now</button>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number"><20</span>
+                        <span class="stat-label">Minutes Delivery</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100+</span>
+                        <span class="stat-label">Happy Students</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4.9★</span>
+                        <span class="stat-label">Customer Rating</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-image d-none d-lg-block">
+                <div class="food-circle">
+                    <div class="food-emoji">🍕</div>
+                    <div class="food-emoji">🍔</div>
+                    <div class="food-emoji">🥤</div>
+                    <div class="food-emoji">🍟</div>
+                    <div class="inner-circle">🎉</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories" id="menu">
+    <div class="container">
+        <h2 class="section-title">Our <span>Popular</span> Categories</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="category-card">
+                    <div class="category-icon">🥤</div>
+                    <h3>Fresh Juices</h3>
+                    <p>Blended fresh daily</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="category-card">
+                    <div class="category-icon">🍟</div>
+                    <h3>Hot Foods</h3>
+                    <p>Crispy & delicious</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="category-card">
+                    <div class="category-icon">🍫</div>
+                    <h3>Snacks</h3>
+                    <p>Perfect for study time</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="category-card">
+                    <div class="category-icon">🥤</div>
+                    <h3>Cold Drinks</h3>
+                    <p>Stay refreshed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works" id="how">
+    <div class="container">
+        <h2 class="section-title">How It <span>Works</span></h2>
+        <div class="row">
+            <div class="col-md-4 step-card">
+                <div class="step-number">1</div>
+                <h4><i class="fas fa-mobile-alt me-2"></i>Browse Menu</h4>
+                <p>Choose from our wide selection of snacks, fresh juices, hot foods, and drinks</p>
+            </div>
+            <div class="col-md-4 step-card">
+                <div class="step-number">2</div>
+                <h4><i class="fas fa-shopping-cart me-2"></i>Place Order</h4>
+                <p>Add items to cart and checkout with M-Pesa or cash on delivery</p>
+            </div>
+            <div class="col-md-4 step-card">
+                <div class="step-number">3</div>
+                <h4><i class="fas fa-motorcycle me-2"></i>Fast Delivery</h4>
+                <p>Get your order delivered right to your dorm in under 20 minutes</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="about">
+    <div class="container">
+        <h2 class="section-title">Why Choose <span>Snack Central?</span></h2>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <div>
+                        <h5>Lightning Fast</h5>
+                        <p>Under 20 minutes delivery guaranteed to You</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-leaf"></i></div>
+                    <div>
+                        <h5>Fresh Ingredients</h5>
+                        <p>Fresh juices blended daily with real fruits</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-tag"></i></div>
+                    <div>
+                        <h5>Student-Friendly Prices</h5>
+                        <p>Affordable pricing with no hidden delivery fees</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div>
+                        <h5>Track Your Order</h5>
+                        <p>Real-time tracking of your delivery from prep to your door</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <div>
+                        <h5>Easy M-Pesa Payment</h5>
+                        <p>Secure payments with M-Pesa or cash on delivery</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-star"></i></div>
+                    <div>
+                        <h5>Quality Guaranteed</h5>
+                        <p>Branded packaging with sauces and serviettes included</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Hungry? Order Now!</h2>
+        <p>Join 100+ Customers already enjoying fast food delivery</p>
+        <a href="{% url 'login' %}" class="btn btn-cta">
+            <i class="fas fa-utensils me-2"></i> Start Ordering
+        </a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="contact">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5><i class="fas fa-burger me-2"></i>Snack Central</h5>
+                <p>Fast food delivery exclusively. Get your favorite snacks in under 20
+                    minutes!</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5>Quick Links</h5>
+                <a href="#menu">Menu</a>
+                <a href="#how">How It Works</a>
+                <a href="#about">About Us</a>
+                <a href="{% url 'auth' %}">Track Order</a>
+            </div>
+            <div class="col-md-3">
+                <h5>Customer Service</h5>
+                <a href="#">FAQs</a>
+                <a href="#">Contact Us</a>
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+            <div class="col-md-3">
+                <div class="operating-hours">
+                    <h6><i class="far fa-clock me-2"></i>Operating Hours</h6>
+                    <p><strong>Monday - Sunday</strong><br>11:00 AM - 8:00 PM</p>
+                    <p class="mb-0"><i class="fas fa-phone me-2"></i>+254 712 644 581 | +254 719 638 689</p>
+                </div>
+            </div>
+        </div>
+        <hr style="border-color: #374151; margin: 2rem 0;">
+        <div class="text-center">
+            <p class="mb-0">&copy; 2025 Snack Central. All rights reserved. Made with ❤️.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
+        });
+    });
+
+    // Add scroll animation for elements
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe category cards
+    document.querySelectorAll('.category-card, .feature-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+
+    // Navbar background change on scroll
+    window.addEventListener('scroll', () => {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+            navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.15)';
+        } else {
+            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+            navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+        }
+    });
+
+    // Animate stats on scroll
+    const statsSection = document.querySelector('.hero-stats');
+    let hasAnimated = false;
+
+    const animateStats = () => {
+        if (hasAnimated) return;
+
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach((stat, index) => {
+            const text = stat.textContent;
+            const isNumber = !isNaN(parseInt(text));
+
+            if (isNumber) {
+                const target = parseInt(text);
+                let current = 0;
+                const increment = target / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        stat.textContent = text;
+                        clearInterval(timer);
+                    } else {
+                        stat.textContent = Math.floor(current) + (text.includes('+') ? '+' : '');
+                    }
+                }, 30);
+            }
+        });
+        hasAnimated = true;
+    };
+
+    const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateStats();
+            }
+        });
+    }, {threshold: 0.5});
+
+    if (statsSection) {
+        statsObserver.observe(statsSection);
+    }
+
+    // Add click ripple effect to buttons
+    document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.5)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s ease-out';
+            ripple.style.pointerEvents = 'none';
+
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // Add ripple animation style
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+    document.head.appendChild(style);
+
+    // Category card click handler
+    document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('click', function () {
+            const categoryName = this.querySelector('h3').textContent;
+            console.log('Category clicked:', categoryName);
+            // You can add navigation to menu page here
+            // window.location.href = '/menu?category=' + categoryName;
+        });
+    });
+
+    // Add parallax effect to hero section
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const parallaxElements = document.querySelectorAll('.food-circle, .hero-content');
+        parallaxElements.forEach((el, index) => {
+            const speed = index === 0 ? 0.5 : 0.3;
+            el.style.transform = `translateY(${scrolled * speed}px)`;
+        });
+    });
+
+    // Toast notification function (for order button clicks)
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10B981, #F59E0B);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                z-index: 9999;
+                animation: slideInRight 0.5s, slideOutRight 0.5s 2.5s;
+                font-weight: 600;
+            `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Add toast animation styles
+    const toastStyle = document.createElement('style');
+    toastStyle.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+    document.head.appendChild(toastStyle);
+
+    // Handle order button clicks
+    document.querySelectorAll('.btn-order, .btn-cta').forEach(btn => {
+        btn.addEventListener('click', function () {
+            showToast('🎉 Redirecting to login...');
+            location.href = "{% url 'auth' %}";
+        });
+    });
+
+    // Add loading animation for images (if you add real images later)
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Snack Central loaded successfully! 🎉');
+    });
+
+    // Easter egg: Konami code for fun animation
+    let konamiCode = [];
+    const konamiPattern = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
+    document.addEventListener('keydown', (e) => {
+        konamiCode.push(e.key);
+        konamiCode = konamiCode.slice(-10);
+
+        if (konamiCode.join(',') === konamiPattern.join(',')) {
+            document.body.style.animation = 'rainbow 2s infinite';
+            showToast('🎊 You found the secret! Free delivery!');
+
+            const rainbowStyle = document.createElement('style');
+            rainbowStyle.textContent = `
+                    @keyframes rainbow {
+                        0% { filter: hue-rotate(0deg); }
+                        100% { filter: hue-rotate(360deg); }
+                    }
+                `;
+            document.head.appendChild(rainbowStyle);
+
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 2000);
+        }
+    });
+</script>
+</body>
+</html>

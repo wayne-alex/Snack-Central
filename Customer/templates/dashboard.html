@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snack Central - Dashboard</title>
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #10B981;
+            --primary-orange: #F59E0B;
+            --accent-blue: #1E40AF;
+            --light-cream: #FEFCE8;
+            --dark-text: #1F2937;
+            --bottom-nav-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F9FAFB;
+            padding-bottom: var(--bottom-nav-height);
+            overflow-x: hidden;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            padding: 1.5rem 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-greeting {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-details h5 {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .user-details p {
+            margin: 0;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .notification-btn, .cart-btn {
+            position: relative;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .notification-btn:hover, .cart-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .notification-badge, .cart-badge-header {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #EF4444;
+            color: white;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: -30px;
+            padding: 0 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-card:active {
+            transform: scale(0.95);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark-text);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6B7280;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1.5rem 1rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark-text);
+        }
+
+        .see-all {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Menu Item Card */
+        .menu-item-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .menu-item-card:active {
+            transform: scale(0.98);
+        }
+
+        .menu-item-image {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--light-cream), #FEF3C7);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            flex-shrink: 0;
+        }
+
+        .menu-item-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .menu-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .menu-item-name {
+            font-weight: bold;
+            color: var(--dark-text);
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .menu-item-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: var(--primary-orange);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item-rating i {
+            font-size: 0.85rem;
+        }
+
+        .menu-item-description {
+            color: #6B7280;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .menu-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-item-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .add-to-cart-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .add-to-cart-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Category Filters */
+        .category-filters {
+            display: flex;
+            gap: 0.8rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            scrollbar-width: none;
+        }
+
+        .category-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-btn {
+            background: white;
+            border: 2px solid #E5E7EB;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            color: var(--dark-text);
+            white-space: nowrap;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Track Order Card */
+        .track-order-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 2px solid var(--primary-green);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .track-order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+        }
+
+        .order-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-id-badge {
+            background: var(--light-cream);
+            color: var(--dark-text);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        /* Progress Tracker */
+        .progress-tracker {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .progress-line {
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            bottom: 40px;
+            width: 3px;
+            background: #E5E7EB;
+        }
+
+        .progress-line-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(180deg, var(--primary-green), var(--primary-orange));
+            transition: height 1s ease;
+        }
+
+        .progress-step {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-left: 3rem;
+        }
+
+        .progress-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .progress-icon {
+            position: absolute;
+            left: 0;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 3px solid #E5E7EB;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .progress-step.completed .progress-icon {
+            background: var(--primary-green);
+            border-color: var(--primary-green);
+            color: white;
+        }
+
+        .progress-step.active .progress-icon {
+            background: var(--primary-orange);
+            border-color: var(--primary-orange);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .progress-step.active .progress-icon::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--primary-orange);
+            animation: ripple 2s infinite;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .progress-content {
+            flex: 1;
+        }
+
+        .progress-title {
+            font-weight: bold;
+            color: var(--dark-text);
+            margin-bottom: 0.2rem;
+        }
+
+        .progress-time {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .progress-step.active .progress-title {
+            color: var(--primary-orange);
+        }
+
+        .rider-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--light-cream);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .rider-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .rider-details {
+            flex: 1;
+        }
+
+        .rider-name {
+            font-weight: bold;
+            color: var(--dark-text);
+        }
+
+        .rider-phone {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .call-rider-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Order History */
+        .order-history-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .order-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--light-cream), #FEF3C7);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .order-details {
+            flex: 1;
+        }
+
+        .order-id {
+            font-size: 0.85rem;
+            color: #6B7280;
+            margin-bottom: 0.3rem;
+        }
+
+        .order-title {
+            font-weight: bold;
+            color: var(--dark-text);
+            margin-bottom: 0.3rem;
+        }
+
+        .order-date {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+        }
+
+        .order-price {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .order-amount {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .reorder-btn {
+            background: var(--light-cream);
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--primary-orange);
+            font-weight: 600;
+            margin-top: 0.3rem;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            display: none;
+        }
+
+        .profile-section.active {
+            display: block;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 1rem;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .profile-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #F3F4F6;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .profile-option:last-child {
+            border-bottom: none;
+        }
+
+        .profile-option:hover {
+            background: var(--light-cream);
+        }
+
+        .profile-option i {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            width: 30px;
+        }
+
+        .profile-option-content {
+            flex: 1;
+        }
+
+        .profile-option-title {
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.2rem;
+        }
+
+        .profile-option-subtitle {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .profile-option-arrow {
+            color: #D1D5DB;
+        }
+
+        .logout-btn {
+            background: #FEE2E2;
+            color: #DC2626;
+            width: 100%;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--bottom-nav-height);
+            background: white;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0.5rem 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #9CA3AF;
+            transition: all 0.3s;
+            position: relative;
+            flex: 1;
+            padding: 0.5rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary-green);
+        }
+
+        .nav-item.active .nav-icon {
+            transform: scale(1.2);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+            border-radius: 0 0 3px 3px;
+        }
+
+        .cart-badge-nav {
+            position: absolute;
+            top: -5px;
+            right: 20%;
+            background: var(--primary-orange);
+            color: white;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            padding: 0 5px;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .quick-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.8rem;
+            }
+
+            .stat-card {
+                padding: 1rem 0.5rem;
+            }
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            opacity: 0.6;
+            margin-bottom: 1rem;
+        }
+
+        .order-receipt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        /* Modal */
+        .order-receipt-modal {
+            background: #fff;
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 480px;
+            width: 95%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Branding */
+        .receipt-branding {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .receipt-branding .logo {
+            height: 50px;
+            margin-right: 1rem;
+        }
+
+        .receipt-branding .brand-emoji {
+            font-size: 2rem;
+        }
+
+        /* Header */
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .close-receipt-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Order Details */
+        .receipt-details div {
+            margin: 0.25rem 0;
+        }
+
+        /* Barcode */
+        .receipt-barcode {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .receipt-barcode img {
+            height: 60px;
+        }
+
+        /* Items */
+        .receipt-items ul {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0;
+        }
+
+        .receipt-items li {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #ccc;
+            padding: 0.25rem 0;
+        }
+
+        /* Total */
+        .receipt-total {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Actions */
+        .receipt-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .receipt-actions button {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .receipt-actions button:hover {
+            background: #e64a19;
+        }
+
+        .profile-hero {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            padding: 3rem 0 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle fill="rgba(255,255,255,0.1)" cx="50" cy="50" r="40"/></svg>');
+            opacity: 0.3;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .avatar-edit-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--primary-orange);
+            border: 3px solid white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .avatar-edit-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .profile-name {
+            text-align: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-email {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            margin-top: -3rem;
+            position: relative;
+            z-index: 2;
+            padding: 0 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--gray-200);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* Content Section */
+        .content-section {
+            padding: 0 1rem 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Personal Information Card */
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .field-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-input-group {
+            position: relative;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            color: var(--dark-text);
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        .edit-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-green);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .edit-icon:hover {
+            color: var(--primary-orange);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Save Button */
+        .save-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Feedback Section */
+        .feedback-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feedback-icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .feedback-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .feedback-info p {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin: 0;
+        }
+
+        .rating-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-label {
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .star {
+            color: var(--gray-200);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: var(--primary-orange);
+            transform: scale(1.1);
+        }
+
+        .feedback-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .feedback-textarea:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .submit-feedback-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .submit-feedback-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* Settings Card */
+        .settings-card {
+            background: white;
+            border-radius: 16px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .setting-item:hover {
+            background: var(--gray-50);
+        }
+
+        .setting-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .setting-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--light-cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+            font-size: 1.25rem;
+        }
+
+        .setting-text h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .setting-text p {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin: 0;
+        }
+
+        .setting-arrow {
+            color: var(--gray-600);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: var(--gray-200);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary-green);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 25px;
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            background: var(--gray-100);
+            color: var(--dark-text);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: #EF4444;
+            color: white;
+        }
+
+        /* Success Toast */
+        .toast-notification {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            animation: slideDown 0.3s, slideUp 0.3s 2.2s;
+            font-weight: 600;
+            display: none;
+        }
+
+        .toast-notification.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-50%) translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 1rem 0.5rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .profile-hero {
+                padding: 2rem 0 4rem;
+            }
+
+            .profile-avatar-large {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .profile-name {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Top Header -->
+<div class="top-header">
+    <div class="container">
+        <div class="user-greeting">
+            <div class="user-info">
+                <div class="user-avatar">{{ request.user.initials }}</div>
+                <div class="user-details">
+                    <h5>Hello, {{ request.user.first_name }}!</h5>
+                    <p> {{ request.user.email }}</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="cart-btn" onclick="switchSection('cartSection')">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge-header" id="cartCountHeader">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="quick-stats">
+    <div class="stat-card">
+        <div class="stat-icon">🛍️</div>
+        <span class="stat-value">{{ orders.count }}</span>
+        <span class="stat-label">Orders</span>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <span class="stat-value">{{ points }}</span>
+        <span class="stat-label">Points</span>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <span class="stat-value">KES 0</span>
+        <span class="stat-label">Wallet</span>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Home Section -->
+    <div class="content-section active" id="homeSection">
+
+        <!-- Welcome Card -->
+        <div class="section">
+            <div class="profile-card"
+                 style="background: linear-gradient(135deg, var(--primary-green), var(--primary-orange)); color:white;">
+                <h4 style="font-weight:bold;">🍔 Hungry, {{ request.user.first_name }}?</h4>
+                <p style="opacity:.9;">Order your favorite snacks in minutes</p>
+                <button onclick="switchSection('menuSection')"
+                        style="margin-top:1rem; background:white; color:var(--primary-green); border:none;
+                    padding:0.6rem 1.5rem; border-radius:25px; font-weight:bold;">
+                    Browse Menu
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Order (Compact) -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">Active Order</h3>
+            </div>
+            {% if active_order %}
+
+                <div class="order-history-card"
+                     style="border-left:5px solid var(--primary-orange);">
+                    <div class="order-icon">🛵</div>
+                    <div class="order-details">
+                        <div class="order-title">Order #{{ active_order.order_id }}</div>
+                        <div class="order-date">{{ active_order.status }}</div>
+                    </div>
+                    <div class="order-price">
+                        <span class="status-badge">Tracking</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="profile-card text-center">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+                    <h5>No Active Orders</h5>
+                    <p style="color:#6B7280;">
+                        You don’t have any ongoing orders right now.
+                    </p>
+
+                    <button class="add-to-cart-btn mt-3"
+                            onclick="switchSection('menuSection')"
+                            style="padding: 0.8rem 2rem;">
+                        <i class="fas fa-utensils me-2"></i>Browse Menu
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">Quick Actions</h3>
+            </div>
+
+            <div class="quick-stats">
+                <div class="stat-card" onclick="switchSection('menuSection')">
+                    <div class="stat-icon">🍽️</div>
+                    <span class="stat-label">Order Food</span>
+                </div>
+                <div class="stat-card" onclick="switchSection('ordersSection')">
+                    <div class="stat-icon">📦</div>
+                    <span class="stat-label">My Orders</span>
+                </div>
+                <div class="stat-card" onclick="switchSection('profileSection')">
+                    <div class="stat-icon">👤</div>
+                    <span class="stat-label">Profile</span>
+                </div>
+            </div>
+        </div>
+
+        {% if recent_order %}
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">Order Again</h3>
+                    <a href="#" class="see-all" onclick="switchSection('ordersSection')">View All</a>
+                </div>
+
+                <div class="order-history-card">
+                    <div class="order-icon">
+                        {{ recent_order.items.first.item.emoji|default:"🍽️" }}
+                    </div>
+
+                    <div class="order-details">
+                        <div class="order-title">
+                            {% for item in recent_order.items.all %}
+                                {{ item.item.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <div class="order-date">
+                            {{ recent_order.placed_at|date:"M d, Y" }}
+                        </div>
+                    </div>
+
+                    <div class="order-price">
+                        <button class="reorder-btn">Reorder</button>
+                    </div>
+                </div>
+
+            </div>
+        {% else %}
+            <div class="profile-card text-center">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🕒</div>
+                <h5>No Order History</h5>
+                <p style="color:#6B7280;">
+                    Your past orders will appear here once you place one.
+                </p>
+            </div>
+        {% endif %}
+
+
+    </div>
+
+
+    <!-- Menu Section -->
+    <div class="content-section" id="menuSection">
+        <div class="section">
+            <h3 class="section-title mb-3">Our Menu</h3>
+
+            <!-- Category Filters -->
+            <div class="category-filters">
+                <button class="category-btn active" data-category="all">All</button>
+
+                {% for category in categories %}
+                    <button class="category-btn"
+                            data-category="cat-{{ category.id }}">
+                        {{ category.emoji }} {{ category.name }}
+                    </button>
+                {% endfor %}
+            </div>
+
+
+            <!-- Menu Items -->
+            <div id="menuItems">
+
+                {% for category in categories %}
+                    {% for item in category.items.all %}
+                        <div class="menu-item-card"
+                             data-category="cat-{{ category.id }}"
+                             data-id="{{ item.id }}"
+                             data-name="{{ item.name }}"
+                             data-price="{{ item.price }}">
+
+                            <div class="menu-item-image">
+                                {{ item.emoji }}
+                            </div>
+
+                            <div class="menu-item-details">
+                                <div>
+                                    <div class="menu-item-name">
+                                        {{ item.name }}
+                                    </div>
+
+                                    <!-- Rating -->
+                                    <div class="menu-item-rating">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= item.average_rating|floatformat:0 %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span>{{ item.average_rating }}</span>
+                                    </div>
+
+                                    <div class="menu-item-description">
+                                        {{ item.description }}
+                                    </div>
+                                </div>
+
+                                <div class="menu-item-footer">
+                                    <div class="menu-item-price">
+                                        KES {{ item.price }}
+                                    </div>
+
+                                    {% if item.in_stock %}
+                                        <button class="add-to-cart-btn"
+                                                onclick="addToCart(this)">
+                                            <i class="fas fa-plus me-1"></i>Add
+                                        </button>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Out of stock</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% empty %}
+                    <!-- NO MENU STATE -->
+                    <div class="empty-state">
+                        <span style="font-size:48px;">🍽️</span>
+                        <h4>No menu available</h4>
+                        <p>Please check back later</p>
+                    </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Cart Section -->
+    <div class="content-section" id="cartSection">
+        <div class="section">
+            <h3 class="section-title mb-3">Shopping Cart</h3>
+            <div id="cartItems">
+                <div class="empty-state" style="text-align: center; padding: 3rem 1rem; color: #9CA3AF;">
+                    <i class="fas fa-shopping-cart" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <h5>Your cart is empty</h5>
+                    <p>Add items from the menu to get started</p>
+                    <button class="btn btn-primary mt-3" onclick="switchSection('menuSection')"
+                            style="background: linear-gradient(135deg, var(--primary-green), var(--primary-orange)); border: none; padding: 0.7rem 2rem; border-radius: 25px;">
+                        Browse Menu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cart Summary (hidden when empty) -->
+            <div id="cartSummary" style="display: none;">
+                <div class="profile-card" style="margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px dashed #E5E7EB;">
+                        <span style="color: #6B7280;">Subtotal</span>
+                        <span style="font-weight: bold;" id="subtotal">KES 0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px dashed #E5E7EB;">
+                        <span style="color: #6B7280;">Delivery Fee</span>
+                        <span style="font-weight: bold; color: var(--primary-green);">FREE</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem;">
+                        <span style="font-weight: bold;">Total</span>
+                        <span style="font-weight: bold; color: var(--primary-green);" id="total">KES 0</span>
+                    </div>
+                    <button class="add-to-cart-btn" style="width: 100%; margin-top: 1.5rem; padding: 1rem;"
+                            onclick="checkout()">
+                        <i class="fas fa-check me-2"></i>Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div class="content-section" id="ordersSection">
+        <div class="section">
+            <h3 class="section-title mb-3">All Orders</h3>
+
+            {% if orders %}
+                {% for order in orders %}
+                    <div class="order-history-card"
+                         onclick="fetchOrderDetails('{{ order.id }}')">
+                        <div class="order-icon">
+                            {% if order.items.all %}
+                                {{ order.items.all.0.item.emoji }}
+                            {% else %}
+                                🍔
+                            {% endif %}
+                        </div>
+                        <div class="order-details">
+                            <div class="order-id">#{{ order.order_id }}</div>
+                            <div class="order-title">
+                                {{ order.items.count }} item{% if order.items.count > 1 %}s{% endif %} •
+                                {{ order.get_status_display }}
+                            </div>
+                            <div class="order-date">
+                                {{ order.placed_at|date:"M d, Y, h:i A" }}
+                            </div>
+                        </div>
+                        <div class="order-price">
+                            <div class="order-amount">KES {{ order.total_price }}</div>
+                            <button class="reorder-btn">Reorder</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="profile-card text-center">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🕒</div>
+                    <h5>No Order History</h5>
+                    <p style="color:#6B7280;">
+                        Your past orders will appear here once you place one.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Profile Section -->
+<div class="content-section profile-section" id="profileSection">
+    <div class="profile-hero">
+        <div class="container">
+            <div class="profile-avatar-large">
+                {{ request.user.initials }}
+
+            </div>
+            <h2 class="profile-name">{{ request.user.get_full_name }}</h2>
+            <p class="profile-email">{{ request.user.email }}</p>
+        </div>
+    </div>
+
+
+    <!-- Personal Information -->
+    <div class="section-title">
+        <i class="fas fa-user-circle"></i>
+        Personal Information
+    </div>
+
+    <div class="info-card">
+        <form id="profileForm">
+            <div class="info-grid">
+                <div class="info-field">
+                    <label class="field-label">Full Name</label>
+                    <div class="field-input-group">
+                        <i class="fas fa-user field-icon"></i>
+                        <input type="text" class="field-input" value="John Doe" id="fullName">
+                        <i class="fas fa-edit edit-icon" onclick="enableEdit('fullName')"></i>
+                    </div>
+                </div>
+
+                <div class="info-field">
+                    <label class="field-label">Email Address</label>
+                    <div class="field-input-group">
+                        <i class="fas fa-envelope field-icon"></i>
+                        <input type="email" class="field-input" value="john.doe@eavistudent.ac.ke" id="email">
+                        <i class="fas fa-edit edit-icon" onclick="enableEdit('email')"></i>
+                    </div>
+                </div>
+
+                <div class="info-field">
+                    <label class="field-label">Phone Number</label>
+                    <div class="field-input-group">
+                        <i class="fas fa-phone field-icon"></i>
+                        <input type="tel" class="field-input" value="+254 712 345 678" id="phone">
+                        <i class="fas fa-edit edit-icon" onclick="enableEdit('phone')"></i>
+                    </div>
+                </div>
+
+                <div class="info-field">
+                    <label class="field-label">Student ID</label>
+                    <div class="field-input-group">
+                        <i class="fas fa-id-card field-icon"></i>
+                        <input type="text" class="field-input" value="EAVI2024001" id="studentId" readonly
+                               style="background: var(--gray-50);">
+                    </div>
+                </div>
+
+                <div class="info-field">
+                    <label class="field-label">Campus Block</label>
+                    <div class="field-input-group">
+                        <i class="fas fa-building field-icon"></i>
+                        <input type="text" class="field-input" value="Block A" id="campusBlock">
+                        <i class="fas fa-edit edit-icon" onclick="enableEdit('campusBlock')"></i>
+                    </div>
+                </div>
+
+                <div class="info-field">
+                    <label class="field-label">Room Number</label>
+                    <div class="field-input-group">
+                        <i class="fas fa-door-open field-icon"></i>
+                        <input type="text" class="field-input" value="Room 204" id="roomNumber">
+                        <i class="fas fa-edit edit-icon" onclick="enableEdit('roomNumber')"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="save-btn mt-4">
+                <i class="fas fa-save me-2"></i>
+                Save Changes
+            </button>
+        </form>
+    </div>
+
+    <!-- Feedback Section -->
+    <div class="section-title mt-4">
+        <i class="fas fa-comment-dots"></i>
+        Send Us Feedback
+    </div>
+
+    <div class="feedback-card">
+        <div class="feedback-header">
+            <div class="feedback-icon-box">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="feedback-info">
+                <h3>How are we doing?</h3>
+                <p>Your feedback helps us improve</p>
+            </div>
+        </div>
+
+        <form id="feedbackForm">
+            <div class="rating-section">
+                <label class="rating-label">Rate your experience</label>
+                <div class="star-rating" id="starRating">
+                    <span class="star" data-rating="1">⭐</span>
+                    <span class="star" data-rating="2">⭐</span>
+                    <span class="star" data-rating="3">⭐</span>
+                    <span class="star" data-rating="4">⭐</span>
+                    <span class="star" data-rating="5">⭐</span>
+                </div>
+            </div>
+
+            <div class="info-field mb-3">
+                <label class="field-label">Your Feedback</label>
+                <textarea class="feedback-textarea"
+                          placeholder="Tell us what you think about EAVI Delivery. What do you love? What can we improve?"
+                          id="feedbackText"></textarea>
+            </div>
+
+            <button type="submit" class="submit-feedback-btn">
+                <i class="fas fa-paper-plane"></i>
+                Submit Feedback
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Settings Section -->
+<div class="section-title mt-4">
+    <i class="fas fa-cog"></i>
+    Settings & Preferences
+</div>
+
+<div class="settings-card">
+    <div class="setting-item">
+        <div class="setting-left">
+            <div class="setting-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="setting-text">
+                <h4>Push Notifications</h4>
+                <p>Get order updates</p>
+            </div>
+        </div>
+        <div class="toggle-switch active" onclick="toggleSwitch(this)">
+            <div class="toggle-slider"></div>
+        </div>
+    </div>
+
+    <div class="setting-item">
+        <div class="setting-left">
+            <div class="setting-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="setting-text">
+                <h4>Email Notifications</h4>
+                <p>Receive promotional emails</p>
+            </div>
+        </div>
+        <div class="toggle-switch" onclick="toggleSwitch(this)">
+            <div class="toggle-slider"></div>
+        </div>
+    </div>
+
+    <div class="setting-item" onclick="showToast('🔒 Password change feature coming soon!')">
+        <div class="setting-left">
+            <div class="setting-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <div class="setting-text">
+                <h4>Change Password</h4>
+                <p>Update your security</p>
+            </div>
+        </div>
+        <i class="fas fa-chevron-right setting-arrow"></i>
+    </div>
+
+    <div class="setting-item" onclick="showToast('❓ Help center opening soon!')">
+        <div class="setting-left">
+            <div class="setting-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="setting-text">
+                <h4>Help & Support</h4>
+                <p>FAQs and assistance</p>
+            </div>
+        </div>
+        <i class="fas fa-chevron-right setting-arrow"></i>
+    </div>
+
+    <div class="setting-item" onclick="showToast('📄 Privacy policy opening...')">
+        <div class="setting-left">
+            <div class="setting-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="setting-text">
+                <h4>Privacy Policy</h4>
+                <p>How we protect your data</p>
+            </div>
+        </div>
+        <i class="fas fa-chevron-right setting-arrow"></i>
+    </div>
+</div>
+
+<!-- Logout Button -->
+<button class="logout-btn" onclick="logout()">
+    <i class="fas fa-sign-out-alt"></i>
+    Logout
+</button>
+
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <a href="#" class="nav-item active" data-section="homeSection">
+        <i class="nav-icon fas fa-home"></i>
+        <span class="nav-label">Home</span>
+    </a>
+    <a href="#" class="nav-item" data-section="menuSection">
+        <i class="nav-icon fas fa-utensils"></i>
+        <span class="nav-label">Menu</span>
+    </a>
+    <a href="#" class="nav-item" data-section="cartSection">
+        <div class="nav-icon">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge-nav" id="cartCountNav" style="display: none;">0</span>
+        </div>
+        <span class="nav-label">Cart</span>
+    </a>
+    <a href="#" class="nav-item" data-section="ordersSection">
+        <i class="nav-icon fas fa-receipt"></i>
+        <span class="nav-label">Orders</span>
+    </a>
+    <a href="#" class="nav-item" data-section="profileSection">
+        <i class="nav-icon fas fa-user"></i>
+        <span class="nav-label">Profile</span>
+    </a>
+</div>
+<!-- Order Receipt Modal -->
+
+<div class="order-receipt-overlay" id="orderReceiptOverlay" style="display: none;">
+    <div class="order-receipt-modal">
+        <!-- Logo & Branding -->
+        <div class="receipt-branding">
+            <div class="brand-emoji">🍔</div>
+        </div>
+
+        <!-- Header -->
+        <div class="receipt-header">
+            <h2>Order Receipt</h2>
+            <button class="close-receipt-btn" onclick="closeReceipt()">✖</button>
+        </div>
+
+        <!-- Order Info -->
+        <div class="receipt-details">
+            <div><strong>Customer Name:</strong> <span id="receiptCustomerName"></span></div>
+            <div><strong>Order ID:</strong> <span id="receiptOrderId"></span></div>
+            <div><strong>Status:</strong> <span id="receiptOrderStatus"></span></div>
+            <div><strong>Date:</strong> <span id="receiptOrderDate"></span></div>
+            <div><strong>Delivery Location:</strong> <span id="receiptOrderLocation"></span></div>
+            <div><strong>Payment Method:</strong> <span id="receiptPaymentMethod"></span></div>
+        </div>
+
+        <!-- Barcode -->
+        <div class="receipt-barcode">
+            <img id="receiptBarcode" src="" alt="Order Barcode">
+        </div>
+
+        <!-- Items List -->
+        <div class="receipt-items">
+            <h3>Items</h3>
+            <ul id="receiptItemsList"></ul>
+        </div>
+
+        <!-- Total -->
+        <div class="receipt-total">
+            <strong>Total:</strong> KES <span id="receiptTotalPrice"></span>
+        </div>
+
+        <!-- Actions -->
+        <div class="receipt-actions">
+            <button onclick="window.print()">🖨️ Print Receipt</button>
+            <button onclick="closeReceipt()">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+<script>
+
+
+    // Bottom Navigation Handler
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+            const targetSection = this.getAttribute('data-section');
+            switchSection(targetSection);
+        });
+    });
+
+    // Switch Content Sections
+    function switchSection(sectionId) {
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+
+        // Update nav active state
+        document.querySelectorAll('.nav-item').forEach(nav => {
+            if (nav.getAttribute('data-section') === sectionId) {
+                nav.classList.add('active');
+            } else {
+                nav.classList.remove('active');
+            }
+        });
+
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    // Category Filter
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const category = this.getAttribute('data-category');
+            const items = document.querySelectorAll('.menu-item-card');
+
+            items.forEach(item => {
+                if (category === 'all' || item.getAttribute('data-category') === category) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Add to Cart
+    function addToCart(button) {
+        const card = button.closest('.menu-item-card');
+        const itemId = card.getAttribute('data-id');
+
+        fetch('/cart/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+
+            },
+            body: JSON.stringify({item_id: itemId})
+        })
+            .then(res => res.json())
+            .then(data => {
+                cart = data.items;
+                updateCart(data);
+                showToast('✅ Item added to cart!');
+            });
+    }
+
+
+    // Update Cart Display
+    function updateCart(serverData) {
+        const cartItems = serverData.items || [];
+        const cartCount = serverData.total_items || 0;
+        const subtotal = serverData.subtotal || 0;
+
+        // Update cart badges
+        document.getElementById('cartCountHeader').textContent = cartCount;
+        document.getElementById('cartCountNav').textContent = cartCount;
+
+        document.getElementById('cartCountNav').style.display =
+            cartCount > 0 ? 'flex' : 'none';
+
+        const cartItemsDiv = document.getElementById('cartItems');
+        const cartSummaryDiv = document.getElementById('cartSummary');
+
+        // EMPTY CART STATE
+        if (cartCount === 0) {
+            cartItemsDiv.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 3rem 1rem; color: #9CA3AF;">
+                <i class="fas fa-shopping-cart" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                <h5>Your cart is empty</h5>
+                <p>Add items from the menu to get started</p>
+                <button class="btn btn-primary mt-3"
+                        onclick="switchSection('menuSection')"
+                        style="background: linear-gradient(135deg, var(--primary-green), var(--primary-orange)); border: none; padding: 0.7rem 2rem; border-radius: 25px;">
+                    Browse Menu
+                </button>
+            </div>
+        `;
+            cartSummaryDiv.style.display = 'none';
+            return;
+        }
+
+        // POPULATED CART
+        let html = '';
+
+        cartItems.forEach(item => {
+            html += `
+            <div class="order-history-card">
+                <div class="order-icon">${item.emoji}</div>
+                <div class="order-details">
+                    <div class="order-title">${item.name}</div>
+                    <div class="order-date">KES ${item.price} each</div>
+                </div>
+                <div class="order-price">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <button onclick="updateQuantity('${item.id}', -1)"
+                                style="background: #F3F4F6; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold;">-</button>
+
+                        <span style="font-weight: bold; min-width: 20px; text-align: center;">
+                            ${item.quantity}
+                        </span>
+
+                        <button onclick="updateQuantity('${item.id}', 1)"
+                                style="background: var(--primary-green); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold;">+</button>
+                    </div>
+                    <div class="order-amount">KES ${item.total}</div>
+                </div>
+            </div>
+        `;
+        });
+
+        cartItemsDiv.innerHTML = html;
+        document.getElementById('subtotal').textContent = `KES ${subtotal}`;
+        document.getElementById('total').textContent = `KES ${subtotal}`;
+        cartSummaryDiv.style.display = 'block';
+    }
+
+
+    // Update Quantity
+    function updateQuantity(itemId, change) {
+        fetch('/cart/update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                item_id: itemId,
+                change: change
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                cart = data.items;
+                updateCart(data);
+            });
+    }
+
+    // Checkout
+    function checkout() {
+
+        showToast('➡️ Redirecting to checkout...');
+
+        setTimeout(() => {
+            window.location.href = '/checkout/';
+        }, 500);
+    }
+
+    function openReceipt(orderData) {
+        document.getElementById('orderReceiptOverlay').style.display = 'flex';
+
+        document.getElementById('receiptCustomerName').textContent = orderData.customer_name;
+        document.getElementById('receiptOrderId').textContent = orderData.order_id;
+        document.getElementById('receiptOrderStatus').textContent = orderData.status;
+        document.getElementById('receiptOrderDate').textContent = orderData.placed_at;
+        document.getElementById('receiptOrderLocation').textContent = orderData.delivery_location;
+        document.getElementById('receiptPaymentMethod').textContent = orderData.payment_method;
+
+        // Items
+        const itemsList = document.getElementById('receiptItemsList');
+        itemsList.innerHTML = '';
+        orderData.items.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${item.emoji} ${item.name} x ${item.quantity}</span> <span>KES ${item.price}</span>`;
+            itemsList.appendChild(li);
+        });
+
+        // Total
+        document.getElementById('receiptTotalPrice').textContent = orderData.total_price;
+
+        // Generate Barcode
+        JsBarcode("#receiptBarcode", orderData.order_id, {
+            format: "CODE128",
+            width: 2,
+            height: 50,
+            displayValue: false
+        });
+    }
+
+
+    // Close modal
+    function closeReceipt() {
+        document.getElementById('orderReceiptOverlay').style.display = 'none';
+    }
+
+    async function fetchOrderDetails(orderId) {
+        try {
+            const res = await fetch(`/order/details/${orderId}/`);
+            const data = await res.json();
+
+            if (data.success) {
+                openReceipt(data.order);
+            } else {
+                showToast("❌ Failed to load order details");
+            }
+        } catch (err) {
+            showToast("❌ Error fetching order");
+            console.error(err);
+        }
+    }
+
+
+    // Toast Notification
+    function showToast(message) {
+        document.querySelectorAll('.toast-notification').forEach(t => t.remove());
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.style.cssText = `
+                position: fixed;
+                top: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 50px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                z-index: 9999;
+                animation: slideDown 0.4s, slideUp 0.4s 2.1s;
+                font-weight: 600;
+                max-width: 90%;
+                text-align: center;
+            `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    // Toast animations
+    const toastStyle = document.createElement('style');
+    toastStyle.textContent = `
+            @keyframes slideDown {
+                from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+            @keyframes slideUp {
+                from { transform: translateX(-50%) translateY(0); opacity: 1; }
+                to { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+            }
+        `;
+    document.head.appendChild(toastStyle);
+
+    // Additional event handlers
+    document.querySelector('.notification-btn').addEventListener('click', () => {
+        showToast('🔔 You have 3 new notifications');
+    });
+
+
+    document.querySelector('.logout-btn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+            showToast('Logging out...');
+        }
+    });
+
+    // Initialize
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            showToast('👋 Welcome back, {{ request.user.first_name }}!');
+        }, 500);
+
+        // 🔄 Restore cart from server
+        fetch('/cart/')
+            .then(res => res.json())
+            .then(data => {
+                updateCart(data);
+            })
+            .catch(() => {
+                console.error('Failed to load cart');
+            });
+    });
+
+
+</script>
+</body>
+</html>
